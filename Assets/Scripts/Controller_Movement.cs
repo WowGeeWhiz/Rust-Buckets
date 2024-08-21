@@ -40,7 +40,6 @@ public class Controller_Movement : MonoBehaviour
     public float sensitivityMovement;
     public float sensitivityVertical;
     public float sensitivityHorizontal;
-    public float detectionNarrowSite;
     public float sprintSpeed;
 
     private Rigidbody playerRB;
