@@ -1,0 +1,37 @@
+/// 
+
+Found By: Michael Knighten
+
+Date Found: 8_21_2024
+
+Script: Controller_Movement
+
+Bugs:
+
+1. If the player moves too quickly, they will force their way through ramps and walls.
+
+2. Continuous momentum and rotation if the player get hit by something too suddenly.
+
+3. Player can glitch partially into a wall and surf even with the ceiling.
+
+Fix Status: 
+
+Awaiting Patch
+
+Date Fixed: NULL
+
+///
+
+Found By:
+
+Date Found:
+
+Script:
+
+Bugs:
+
+Fix Status:
+
+Date Fixed:
+
+///
