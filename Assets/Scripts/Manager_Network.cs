@@ -33,15 +33,15 @@ using System.Collections;
 /// 
 /// Note:
 /// 
-/// Singletons carry over from scene to scene and allow for persistant data.
+/// -Singletons carry over from scene to scene and allow for persistant data.
 /// 
-/// A port number is a way to identify specific processes or services on a network.
+/// -A port number is a way to identify specific processes or services on a network.
 /// 
-/// Both client and Host must have the same Port Number to connect.
+/// -Both client and Host must have the same Port Number to connect.
 /// 
-/// You need both the Port Number and the IP Address to connect.
+/// -You need both the Port Number and the IP Address to connect.
 /// 
-/// This is a work in progress.
+/// -This is a work in progress.
 /// 
 /// --------------------------------------------------------------------------------------------------------
 /// </summary>
@@ -79,7 +79,7 @@ public class Manager_Network : MonoBehaviour
 
         // Relay IP Address:
         ipAddress = GetLocalIPAddress();
-        Debug.Log($"Local IP Address: {ipAddress} and Port Numner: " + portNumber);
+        //Debug.Log($"Local IP Address: {ipAddress} and Port Numner: " + portNumber);
 
         //Establish IP Address and Port Number
         var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();

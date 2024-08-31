@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Manager_Boundaries : MonoBehaviour
+public class Controller_Action : MonoBehaviour
 {
     // Start is called before the first frame update
     void Start()

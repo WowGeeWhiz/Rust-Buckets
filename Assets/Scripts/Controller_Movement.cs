@@ -8,7 +8,7 @@ using UnityEngine.InputSystem;
 /// 
 /// Date Started: 8_20_2024
 /// 
-/// Last Updated: 8_21_2024
+/// Last Updated: 8_31_2024
 /// 
 ///  <<<DON'T TOUCH MY CODE>>>
 /// 
@@ -29,7 +29,8 @@ using UnityEngine.InputSystem;
 /// Input System
 /// 
 /// Note:
-/// I prefer Inverted look on my controller, just add this to the settings so it can be toggled.
+/// 
+/// -I prefer Inverted look on my controller, just add this to the settings so it can be toggled.
 /// 
 /// --------------------------------------------------------------------------------------------------------
 /// 
@@ -45,23 +46,40 @@ using UnityEngine.InputSystem;
 /// 
 /// Note:
 /// 
-/// When you use Unity.Netcode;, you must change MonoBehaviour to NetworkBehaviour.
+/// -When you use Unity.Netcode;, you must change MonoBehaviour to NetworkBehaviour.
 /// 
-/// IsOwner is for the specific client.
+/// -IsOwner is for the specific client.
 /// 
-/// ClientRpc is for all clients.
+/// -ClientRpc is for all clients.
 /// 
-/// ServerRpc is for the host.
+/// -ServerRpc is for the host.
 /// 
-/// RPC means Remote Procedure Calls.
+/// -RPC means Remote Procedure Calls.
 /// 
-/// You must add a Network Object script (Network Manager) to the object that'll use any script using NetworkBehaviour.
+/// -You must add a Network Object script (Network Manager) to the object that'll use any script using NetworkBehaviour.
 /// 
-/// You will not be able to play unless you declare yourself a host or as a client connect to a host.
+/// -You will not be able to play unless you declare yourself a host or as a client connect to a host.
 /// 
-/// You will need to add the scene to the Network Manager Script.
+/// -You will need to add the scene to the Network Manager Script.
 /// 
 /// --------------------------------------------------------------------------------------------------------
+/// 
+/// Patch 8_31_2024:
+/// 
+/// Description:
+/// 
+/// Added friction, control locking for respawn, and polish to the features based on feedback.
+/// 
+/// Package:
+/// 
+/// N/A
+/// 
+/// Note:
+/// 
+/// -Fixed the spinning issue.
+/// 
+/// -Fixed the sliding issue.
+/// 
 /// </summary>
 
 public class Controller_Movement : NetworkBehaviour
@@ -88,6 +106,7 @@ public class Controller_Movement : NetworkBehaviour
     private float currentSpeed;
     private bool canJump;
     private float initialWalkSpeed;
+    private bool controlsLocked;
 
     // Networking:
     private readonly NetworkVariable<Vector3> position = new();
@@ -109,6 +128,9 @@ public class Controller_Movement : NetworkBehaviour
         canJump = true;
         initialWalkSpeed = walkSpeed;
 
+        // Lock:
+        controlsLocked = false;
+
         // Networking:
         if (IsOwner) 
         {
@@ -123,12 +145,22 @@ public class Controller_Movement : NetworkBehaviour
     {
         if (IsOwner)
         {
+
             Physics_RemainUpright();
 
-            Contoller_Button_Sprint();
-            Controller_Button_Jump();
-            Controller_RightThumbstick_Rotation();
-            Controller_LeftThumbstick_Movement();
+            if (!controlsLocked)
+            {
+
+                Contoller_Button_Sprint();
+                Controller_Button_Jump();
+                Controller_RightThumbstick_Rotation();
+                Controller_LeftThumbstick_Movement();
+
+            }
+            else 
+            {
+                // Controls are locked.
+            }
 
             // Host Network Update:
             UpdateNetworkPosition();
@@ -146,6 +178,19 @@ public class Controller_Movement : NetworkBehaviour
         {
             playerRB.AddForce(Vector3.down * gravityMagnitude * playerRB.mass);
         }
+
+        // Apply friction to reduce spin:
+        ApplyFrictionToRotation();
+
+        // Apply linear friction to prevent sliding:
+        ApplyFrictionToMovement();
+    }
+
+    // Locked/Unlock Controls Method:--------------------------------------------------------------------------------------
+
+    public void LockControls(bool cooldown) 
+    {
+        controlsLocked = cooldown;
     }
 
     // Movement Methods:---------------------------------------------------------------------------------------------------
@@ -250,13 +295,50 @@ public class Controller_Movement : NetworkBehaviour
 
     // Physics:-------------------------------------------------------------------------------------------------------------
 
+    private void ApplyFrictionToRotation()
+    {
+        // Get current angular velocity:
+        Vector3 angularVelocity = playerRB.angularVelocity;
+
+        // Apply damping/friction to reduce unwanted spinning:
+        angularVelocity.x *= 0.9f; // (Adjust the factor as needed (0.9 means 10% reduction))
+        angularVelocity.z *= 0.9f; // (Dampen x and z to reduce horizontal spinning)
+        angularVelocity.y *= 0.9f; // (Optional: Dampen y if needed)
+
+        // Update the Rigidbody's angular velocity with damped values:
+        playerRB.angularVelocity = angularVelocity;
+    }
+
+    private void ApplyFrictionToMovement()
+    {
+        // Check if there's no movement input from the player:
+        Gamepad gamepad = Gamepad.all[0];
+        Vector2 leftStickInput = gamepad.leftStick.ReadValue();
+
+        // If no input on left thumbstick, apply friction:
+        if (leftStickInput.magnitude < 0.1f) // (Adjust the threshold as needed)
+        {
+            // Get current velocity:
+            Vector3 velocity = playerRB.velocity;
+
+            // Apply damping/friction to horizontal velocity (X and Z):
+            velocity.x *= 0.9f; // (Reduce sliding on the X-axis)
+            velocity.z *= 0.9f; // (Reduce sliding on the Z-axis)
+
+            // Update the Rigidbody's velocity with damped values:
+            playerRB.velocity = velocity;
+        }
+    }
+
     private void Physics_RemainUpright()
     {
-        Vector3 currentEulerAngles = transform.rotation.eulerAngles; // Keep upright
+        // Keep upright:
+        Vector3 currentEulerAngles = transform.rotation.eulerAngles;
         currentEulerAngles.x = 0;
         currentEulerAngles.z = 0;
 
-        transform.rotation = Quaternion.Euler(currentEulerAngles); // Apply corrected rotation
+        // Apply corrected rotation:
+        transform.rotation = Quaternion.Euler(currentEulerAngles);
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -290,7 +372,7 @@ public class Controller_Movement : NetworkBehaviour
 
     // Network Position Data:
 
-    private void UpdateNetworkPosition() 
+    public void UpdateNetworkPosition() 
     {
         position.Value = Player.transform.position;
     }
