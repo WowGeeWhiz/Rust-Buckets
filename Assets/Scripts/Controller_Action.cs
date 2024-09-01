@@ -9,15 +9,16 @@ using UnityEngine.UI;
 /// 
 /// Date Started: 9_1_2024
 /// 
-/// Last Updated: NULL
+/// Last Updated: 9_1_2024
 /// 
 ///  <<<DON'T TOUCH MY CODE>>>
 /// 
 /// --------------------------------------------------------------------------------------------------------
 /// 
-/// Initialization 8_20_2024:
+/// Initialization 9_1_2024:
 /// 
 /// Description:
+/// 
 /// Target Reticle set-up switches between blue as neutral to red if there is an enemy to attack.
 /// All enemies will be located in the layer mask called: Interactable, This reduces the amount of objects in the pool to check.
 /// 
@@ -40,7 +41,8 @@ using UnityEngine.UI;
 public class Controller_Action : NetworkBehaviour
 {
 
-    //UI
+    // Attributes:=--------------------------------------------------------------------------------------------------------------
+
     [Header("UI Variables")]
     public RawImage ReticleDynamic;
     public RawImage ReticleStatic;

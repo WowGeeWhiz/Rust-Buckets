@@ -82,6 +82,14 @@ using UnityEngine.InputSystem;
 /// 
 /// -Added Vertical look limitations.
 /// 
+/// -Proper deadzone added.
+/// 
+/// -Adjustment to values based on feedback added.
+/// 
+/// -Prevented player being able to sprint in the air.
+/// 
+/// -Added Togglable Sprint option.
+/// 
 /// </summary>
 
 public class Controller_Movement : NetworkBehaviour
@@ -89,7 +97,6 @@ public class Controller_Movement : NetworkBehaviour
 
     // Attributes:=--------------------------------------------------------------------------------------------------------------
 
-    // Player:
     [Header("Player Variables")]
     public GameObject Player;
     public GameObject Camera;
@@ -104,7 +111,9 @@ public class Controller_Movement : NetworkBehaviour
     public float sprintSpeed;
     public float maxLookUpAngle;
     public float maxLookDownAngle;
-    
+    public bool isSprintToggleMode = false; // Jake's preference setting (Add to settings menu)
+
+    private bool isSprinting = false;
     private float currentVerticalRotation = 0f;
     private Rigidbody playerRB;
     private bool onGround;
@@ -112,6 +121,7 @@ public class Controller_Movement : NetworkBehaviour
     private bool canJump;
     private float initialWalkSpeed;
     private bool controlsLocked;
+
 
     // Networking:
     private readonly NetworkVariable<Vector3> position = new();
@@ -189,6 +199,10 @@ public class Controller_Movement : NetworkBehaviour
 
         // Apply linear friction to prevent sliding:
         ApplyFrictionToMovement();
+
+        // Prevents unwanted turning when moving on slopes:
+        StabilizeMovementOnSlopes();
+
     }
 
     // Locked/Unlock Controls Method:--------------------------------------------------------------------------------------
@@ -202,18 +216,46 @@ public class Controller_Movement : NetworkBehaviour
 
     private void Contoller_Button_Sprint()
     {
+        if (IsOwner && onGround)
+        {
+            Gamepad gamepad = Gamepad.all[0];
+            bool sprintButtonPressed = gamepad.leftStickButton.isPressed;
 
-        if (IsOwner && Gamepad.all[0].leftStickButton.isPressed)
-        {
-            walkSpeed = sprintSpeed;
-        }
-        else
-        {
-            walkSpeed = initialWalkSpeed;
+            if (isSprintToggleMode)
+            {
+                // Toggle mode:
+                if (sprintButtonPressed && !isSprinting)
+                {
+                    // Start sprinting:
+                    walkSpeed = sprintSpeed;
+                    isSprinting = true;
+                }
+                else if (sprintButtonPressed && isSprinting)
+                {
+                    // Stop sprinting:
+                    walkSpeed = initialWalkSpeed;
+                    isSprinting = false;
+                }
+            }
+            else
+            {
+                // Hold down mode:
+                if (sprintButtonPressed)
+                {
+                    // Start sprinting:
+                    walkSpeed = sprintSpeed;
+                }
+                else
+                {
+                    // Stop sprinting:
+                    walkSpeed = initialWalkSpeed;
+                }
+            }
         }
     }
 
-    private void Controller_Button_Jump()
+
+private void Controller_Button_Jump()
     {
         if (IsOwner && Gamepad.all[0].aButton.isPressed && canJump) // Cross (X) button by default
         {
@@ -237,12 +279,25 @@ public class Controller_Movement : NetworkBehaviour
             float horizontalRight = rightStick.x;
             float verticalRight = rightStick.y;
 
-            // Adjust sensitivity:
-            horizontalRight *= sensitivityHorizontal;
-            verticalRight *= sensitivityVertical;
+            // Deadzone value:
+            float deadzone = 0.1f;
 
-            // Check if the magnitude of right thumbstick input is greater than a threshold:
-            if (rightStick.magnitude > 0.1f) // (Adjust the threshold value as needed)
+            // Apply deadzone:
+            if (rightStick.magnitude < deadzone)
+            {
+                horizontalRight = 0;
+                verticalRight = 0;
+            }
+            else
+            {
+                // Normalize the input to ensure consistent speed in all directions
+                Vector2 normalizedInput = rightStick.normalized;
+                horizontalRight = normalizedInput.x * sensitivityHorizontal;
+                verticalRight = normalizedInput.y * sensitivityVertical;
+            }
+
+            // Check if the magnitude of right thumbstick input is above the deadzone:
+            if (horizontalRight != 0 || verticalRight != 0)
             {
                 // Rotate the player around its own up axis based on horizontal right thumbstick input:
                 if (Mathf.Abs(horizontalRight) > Mathf.Abs(verticalRight))
@@ -267,7 +322,6 @@ public class Controller_Movement : NetworkBehaviour
             }
         }
     }
-
 
     public void Controller_LeftThumbstick_Movement()
     {
@@ -307,6 +361,52 @@ public class Controller_Movement : NetworkBehaviour
     }
 
     // Physics:-------------------------------------------------------------------------------------------------------------
+
+    private void StabilizeMovementOnSlopes()
+    {
+        // Check if the player is on the ground
+        if (onGround)
+        {
+            // Get the current velocity
+            Vector3 velocity = playerRB.velocity;
+
+            // Cast a ray downward from the player's position to detect the ground below
+            RaycastHit hit;
+            if (Physics.Raycast(Player.transform.position + Vector3.up * 0.1f, Vector3.down, out hit, 2f))
+            {
+                // Calculate the slope normal
+                Vector3 slopeNormal = hit.normal;
+
+                // Project the velocity onto the plane defined by the slope's normal
+                Vector3 slopeVelocity = Vector3.ProjectOnPlane(velocity, slopeNormal);
+
+                // Check if the y velocity is increasing (ascending)
+                bool isAscending = velocity.y > 0;
+
+                if (isAscending)
+                {
+                    // When ascending or on flat terrain, apply smoothing
+                    float smoothingFactor = 0.8f; // Smoothing factor for ascending
+                    playerRB.velocity = Vector3.Lerp(velocity, slopeVelocity, smoothingFactor * Time.fixedDeltaTime);
+
+                    // Limit excessive upward movement while on the ground
+                    if (velocity.y > 0)
+                    {
+                        playerRB.velocity = new Vector3(playerRB.velocity.x, Mathf.Min(velocity.y, 0), playerRB.velocity.z);
+                    }
+                }
+                else
+                {
+                    // If descending, leave the velocity unchanged
+                    // You might still want to ensure smooth descending if needed
+                    // For now, this code does not apply additional changes for descending
+                }
+            }
+        }
+    }
+
+
+
 
     private void ApplyFrictionToRotation()
     {

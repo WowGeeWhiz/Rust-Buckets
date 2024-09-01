@@ -2,6 +2,8 @@ using UnityEngine;
 using Unity.Netcode;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.UI;
+using TMPro;
 
 /// <summary>
 /// 
@@ -9,7 +11,7 @@ using System.Collections.Generic;
 /// 
 /// Date Started: 8_31_2024
 /// 
-/// Last Updated: NULL
+/// Last Updated: 9_1_2024
 /// 
 ///  <<<DON'T TOUCH MY CODE>>>
 ///  
@@ -41,6 +43,23 @@ using System.Collections.Generic;
 /// -Respawns have to accounted for or issues can arise.
 /// 
 /// --------------------------------------------------------------------------------------------------------
+/// Patch: 9_1_2024:
+/// 
+/// Description:
+/// 
+/// Added spawntimer.
+/// 
+/// Package:
+/// 
+/// N/A
+/// 
+/// Note:
+/// 
+/// -Spawn timer added to hud.
+/// 
+/// -Fixed rng for spawnpoints.
+/// 
+/// --------------------------------------------------------------------------------------------------------
 /// </summary>
 
 public class Manager_Boundaries_Respawn : NetworkBehaviour
@@ -53,9 +72,14 @@ public class Manager_Boundaries_Respawn : NetworkBehaviour
     public GameObject[] Player;
     public int depthBoundary;
     public float respawnCooldown;
+    public TextMeshProUGUI countdownText;
 
     private bool playerListInitialized = false;
     private Dictionary<GameObject, Coroutine> activeRespawns = new Dictionary<GameObject, Coroutine>(); // Track active respawn coroutines per player
+
+    [Header("Reticle Variables")]
+    public RawImage ReticleDynamic;
+    public RawImage ReticleStatic;
 
     // Networking Methods:-------------------------------------------------------------------------------------------------------
 
@@ -81,7 +105,7 @@ public class Manager_Boundaries_Respawn : NetworkBehaviour
             CheckDepthOutOfBounds();
 
             // Uncomment if you want to check standard boundaries as well (DONT NOT READY):
-            // CheckOutOfBounds();
+            // CheckBoundaryBarriers();
         }
     }
 
@@ -99,7 +123,7 @@ public class Manager_Boundaries_Respawn : NetworkBehaviour
 
     // Boundary Methods:-------------------------------------------------------------------------------------------------------
 
-    private void CheckOutOfBounds()
+    private void CheckBoundaryBarriers()
     {
         foreach (GameObject player in Player)
         {
@@ -159,6 +183,10 @@ public class Manager_Boundaries_Respawn : NetworkBehaviour
             if (controllerMovement != null)
             {
                 controllerMovement.LockControls(true);
+
+                //Hide Reticle:
+                ReticleDynamic.enabled = false;
+                ReticleStatic.enabled = false;
             }
 
             // Start the respawn coroutine for this specific player and store it in the dictionary:
@@ -172,25 +200,42 @@ public class Manager_Boundaries_Respawn : NetworkBehaviour
     private IEnumerator RespawnAfterCooldown(GameObject player)
     {
         var controllerMovement = player.GetComponent<Controller_Movement>();
+        var playerStats = player.GetComponent<Player_Stats>();//====================
+
+        //Death:
+        playerStats.TakeDamage(100f);//====================
 
         // Countdown timer:
         float countdown = respawnCooldown;
 
         while (countdown > 0)
         {
-            Debug.Log($"Respawn in {countdown} seconds for player: {player.name}");
+            // Update the TextMeshProUGUI component with the countdown value
+            if (countdownText != null)
+            {
+                countdownText.text = ""+countdown;
+            }
 
-            // Waits for 1 second:
+            // Wait for 1 second:
             yield return new WaitForSeconds(1f);
             countdown--;
         }
 
+        // Clear the text or update it when countdown finishes:
+        if (countdownText != null)
+        {
+            countdownText.text = "";
+        }
+
         // Choose a random Respawn Point:
-        GameObject randomRespawn = RespawnPoints[Random.Range(0, RespawnPoints.Length)];
+        int randomIndex = Random.Range(0, RespawnPoints.Length);
+        GameObject randomRespawn = RespawnPoints[randomIndex];
 
         // Respawn Player:
         player.transform.position = randomRespawn.transform.position;
         player.transform.rotation = Quaternion.identity;
+
+        playerStats.RestoreFullHP();//====================
 
         // Update Network Position:
         if (controllerMovement != null)
@@ -202,6 +247,10 @@ public class Manager_Boundaries_Respawn : NetworkBehaviour
         if (controllerMovement != null)
         {
             controllerMovement.LockControls(false);
+
+            // Show Reticle:
+            ReticleDynamic.enabled = true;
+            ReticleStatic.enabled = true;
         }
 
         // Remove player from active respawn tracking once complete:
@@ -210,4 +259,5 @@ public class Manager_Boundaries_Respawn : NetworkBehaviour
             activeRespawns.Remove(player);
         }
     }
+
 }

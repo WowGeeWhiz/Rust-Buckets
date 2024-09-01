@@ -45,6 +45,8 @@ using System.Collections.Generic;
 
 public class Manager_Boundaries_Respawn : NetworkBehaviour
 {
+    // Attributes:=--------------------------------------------------------------------------------------------------------------
+
     [Header("Boundary/Respawn Variables")]
     public GameObject[] OutOfBoundsWalls;
     public GameObject[] RespawnPoints;

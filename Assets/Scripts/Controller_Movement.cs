@@ -147,7 +147,7 @@ public class Controller_Movement : NetworkBehaviour
         controlsLocked = false;
 
         // Networking:
-        if (IsOwner) 
+        if (IsOwner)
         {
             OwnerClientID();
             position.Value = Player.transform.position;
@@ -172,7 +172,7 @@ public class Controller_Movement : NetworkBehaviour
                 Controller_LeftThumbstick_Movement();
 
             }
-            else 
+            else
             {
                 // Controls are locked.
             }
@@ -199,11 +199,12 @@ public class Controller_Movement : NetworkBehaviour
 
         // Apply linear friction to prevent sliding:
         ApplyFrictionToMovement();
+
     }
 
     // Locked/Unlock Controls Method:--------------------------------------------------------------------------------------
 
-    public void LockControls(bool cooldown) 
+    public void LockControls(bool cooldown)
     {
         controlsLocked = cooldown;
     }
@@ -251,7 +252,7 @@ public class Controller_Movement : NetworkBehaviour
     }
 
 
-private void Controller_Button_Jump()
+    private void Controller_Button_Jump()
     {
         if (IsOwner && Gamepad.all[0].aButton.isPressed && canJump) // Cross (X) button by default
         {
@@ -321,7 +322,7 @@ private void Controller_Button_Jump()
 
     public void Controller_LeftThumbstick_Movement()
     {
-        if (IsOwner) 
+        if (IsOwner)
         {
             Transform playerTransform = Player.transform;
             Transform cameraTransform = Camera.transform;
@@ -353,7 +354,7 @@ private void Controller_Button_Jump()
             // Move the player based on input direction relative to camera's forward direction
             playerTransform.Translate(moveDirection.normalized * currentSpeed * deltaTime, Space.World);
         }
-        
+
     }
 
     // Physics:-------------------------------------------------------------------------------------------------------------
@@ -428,19 +429,19 @@ private void Controller_Button_Jump()
 
     // Client ID:
 
-    private void OwnerClientID() 
+    private void OwnerClientID()
     {
         Debug.Log($"Player {NetworkObject.OwnerClientId} is you Client ID");
     }
 
     // Network Position Data:
 
-    public void UpdateNetworkPosition() 
+    public void UpdateNetworkPosition()
     {
         position.Value = Player.transform.position;
     }
 
-    private void UpdateLocalPosition() 
+    private void UpdateLocalPosition()
     {
         Player.transform.position = position.Value;
     }

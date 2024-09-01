@@ -10,7 +10,7 @@ Bugs:
 
 1. If the player moves too quickly, they will force their way through ramps and walls.
 
-2. Continuous momentum and rotation if the player get hit by something too suddenly.
+2. Continuous momentum and rotation if the player get hit by something too suddenly.-Fixed
 
 3. Player can glitch partially into a wall and surf even with the ceiling.
 
@@ -28,7 +28,7 @@ Date Found: 8_21_2024
 
 Script: Manager_Network
 
-Bugs: Memory Leak
+Bugs: Memory Leak / Not Secure
 
 Fix Status:
 
@@ -51,5 +51,21 @@ Fix Status:
 Fixed
 
 Date Fixed: 8_31_2024
+
+///
+
+Found By: Michael
+
+Date Found: 9_1_2024
+
+Script: Manager_Boundaries_Respawn
+
+Bugs: Respawn launch under map
+
+Fix Status:
+
+Awaiting Patch
+
+Date Fixed: NULL
 
 ///
