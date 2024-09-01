@@ -80,6 +80,16 @@ using UnityEngine.InputSystem;
 /// 
 /// -Fixed the sliding issue.
 /// 
+/// -Added Vertical look limitations.
+/// 
+/// -Proper deadzone added.
+/// 
+/// -Adjustment to values based on feedback added.
+/// 
+/// -Prevented player being able to sprint in the air.
+/// 
+/// -Added Togglable Sprint option.
+/// 
 /// </summary>
 
 public class Controller_Movement : NetworkBehaviour
@@ -100,7 +110,12 @@ public class Controller_Movement : NetworkBehaviour
     public float sensitivityVertical;
     public float sensitivityHorizontal;
     public float sprintSpeed;
+    public float maxLookUpAngle;
+    public float maxLookDownAngle;
+    public bool isSprintToggleMode = false; // Jake's preference setting (Add to settings menu)
 
+    private bool isSprinting = false;
+    private float currentVerticalRotation = 0f;
     private Rigidbody playerRB;
     private bool onGround;
     private float currentSpeed;
@@ -197,18 +212,46 @@ public class Controller_Movement : NetworkBehaviour
 
     private void Contoller_Button_Sprint()
     {
+        if (IsOwner && onGround)
+        {
+            Gamepad gamepad = Gamepad.all[0];
+            bool sprintButtonPressed = gamepad.leftStickButton.isPressed;
 
-        if (IsOwner && Gamepad.all[0].leftStickButton.isPressed)
-        {
-            walkSpeed = sprintSpeed;
-        }
-        else
-        {
-            walkSpeed = initialWalkSpeed;
+            if (isSprintToggleMode)
+            {
+                // Toggle mode:
+                if (sprintButtonPressed && !isSprinting)
+                {
+                    // Start sprinting:
+                    walkSpeed = sprintSpeed;
+                    isSprinting = true;
+                }
+                else if (sprintButtonPressed && isSprinting)
+                {
+                    // Stop sprinting:
+                    walkSpeed = initialWalkSpeed;
+                    isSprinting = false;
+                }
+            }
+            else
+            {
+                // Hold down mode:
+                if (sprintButtonPressed)
+                {
+                    // Start sprinting:
+                    walkSpeed = sprintSpeed;
+                }
+                else
+                {
+                    // Stop sprinting:
+                    walkSpeed = initialWalkSpeed;
+                }
+            }
         }
     }
 
-    private void Controller_Button_Jump()
+
+private void Controller_Button_Jump()
     {
         if (IsOwner && Gamepad.all[0].aButton.isPressed && canJump) // Cross (X) button by default
         {
@@ -219,7 +262,7 @@ public class Controller_Movement : NetworkBehaviour
 
     public void Controller_RightThumbstick_Rotation()
     {
-        if (IsOwner) 
+        if (IsOwner)
         {
             Transform playerTransform = Player.transform;
             Transform cameraTransform = Camera.transform;
@@ -232,29 +275,49 @@ public class Controller_Movement : NetworkBehaviour
             float horizontalRight = rightStick.x;
             float verticalRight = rightStick.y;
 
-            // Adjust sensitivity
-            horizontalRight *= sensitivityHorizontal;
-            verticalRight *= sensitivityVertical;
+            // Deadzone value:
+            float deadzone = 0.1f;
 
-            // Check if the magnitude of right thumbstick input is greater than a threshold
-            if (rightStick.magnitude > 0.1f) // Adjust the threshold value as needed
+            // Apply deadzone:
+            if (rightStick.magnitude < deadzone)
             {
-                // Check if the horizontal magnitude is greater than the vertical magnitude
+                horizontalRight = 0;
+                verticalRight = 0;
+            }
+            else
+            {
+                // Normalize the input to ensure consistent speed in all directions
+                Vector2 normalizedInput = rightStick.normalized;
+                horizontalRight = normalizedInput.x * sensitivityHorizontal;
+                verticalRight = normalizedInput.y * sensitivityVertical;
+            }
+
+            // Check if the magnitude of right thumbstick input is above the deadzone:
+            if (horizontalRight != 0 || verticalRight != 0)
+            {
+                // Rotate the player around its own up axis based on horizontal right thumbstick input:
                 if (Mathf.Abs(horizontalRight) > Mathf.Abs(verticalRight))
                 {
-                    // Rotate the player around its own up axis based on horizontal right thumbstick input
                     playerTransform.Rotate(Vector3.up, horizontalRight * rotationSpeed * Time.deltaTime);
                 }
                 else
                 {
-                    // Rotate the camera around the player based on vertical right thumbstick input
-                    cameraTransform.RotateAround(playerTransform.position, cameraTransform.right, (inversion * verticalRight) * rotationSpeed * Time.deltaTime);
+                    // Update the vertical rotation angle and clamp it:
+                    float newVerticalRotation = currentVerticalRotation + (inversion * verticalRight * rotationSpeed * Time.deltaTime);
+                    newVerticalRotation = Mathf.Clamp(newVerticalRotation, -maxLookDownAngle, maxLookUpAngle);
+
+                    // Calculate the rotation difference:
+                    float rotationDifference = newVerticalRotation - currentVerticalRotation;
+
+                    // Apply the clamped rotation difference:
+                    cameraTransform.RotateAround(playerTransform.position, cameraTransform.right, rotationDifference);
+
+                    // Update the current vertical rotation:
+                    currentVerticalRotation = newVerticalRotation;
                 }
             }
         }
-        
     }
-
 
     public void Controller_LeftThumbstick_Movement()
     {
