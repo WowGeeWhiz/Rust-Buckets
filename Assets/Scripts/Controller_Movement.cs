@@ -97,7 +97,6 @@ public class Controller_Movement : NetworkBehaviour
 
     // Attributes:=--------------------------------------------------------------------------------------------------------------
 
-    // Player:
     [Header("Player Variables")]
     public GameObject Player;
     public GameObject Camera;
@@ -122,6 +121,7 @@ public class Controller_Movement : NetworkBehaviour
     private bool canJump;
     private float initialWalkSpeed;
     private bool controlsLocked;
+
 
     // Networking:
     private readonly NetworkVariable<Vector3> position = new();

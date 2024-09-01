@@ -37,3 +37,19 @@ Awaiting Patch
 Date Fixed: NULL
 
 ///
+
+Found By: Everyone
+
+Date Found: 8_21_2024
+
+Script: Controller_Movment
+
+Bugs: Spin and slide
+
+Fix Status:
+
+Fixed
+
+Date Fixed: 8_31_2024
+
+///
