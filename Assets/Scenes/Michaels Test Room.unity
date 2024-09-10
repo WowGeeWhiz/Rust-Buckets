@@ -3717,6 +3717,10 @@ PrefabInstance:
       propertyPath: jumpForce
       value: 17
       objectReference: {fileID: 0}
+    - target: {fileID: 5953247071164170471, guid: 18cf302f6efceb84abf05f1a04dc014f, type: 3}
+      propertyPath: verticalOffset
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 9059521582870002257, guid: 18cf302f6efceb84abf05f1a04dc014f, type: 3}
       propertyPath: m_Name
       value: Placeholder_Player
