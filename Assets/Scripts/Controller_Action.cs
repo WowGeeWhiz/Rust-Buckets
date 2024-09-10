@@ -1,3 +1,5 @@
+using System;
+using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -9,7 +11,7 @@ using UnityEngine.UI;
 /// 
 /// Date Started: 9_1_2024
 /// 
-/// Last Updated: 9_1_2024
+/// Last Updated: 9_5_2024
 /// 
 ///  <<<DON'T TOUCH MY CODE>>>
 /// 
@@ -36,6 +38,22 @@ using UnityEngine.UI;
 /// 
 /// --------------------------------------------------------------------------------------------------------
 /// 
+/// Patch: 9_5_2024
+/// 
+/// Description:
+/// 
+///  reticle color change as well as the fire reticle change.
+/// 
+/// Package:
+/// 
+/// N/A
+/// 
+/// Note:
+/// 
+/// N/A
+/// 
+/// --------------------------------------------------------------------------------------------------------
+/// 
 /// </summary>
 
 public class Controller_Action : NetworkBehaviour
@@ -51,10 +69,15 @@ public class Controller_Action : NetworkBehaviour
     public Texture ReticleDynamicBlue;
     public Texture ReticleDynamicRed;
     public GameObject Camera;
+    public GameObject Player;
     public float detectionNarrowSite;
     public float maxOffset;
+    public GameObject Aimed_Container;
 
     private RectTransform ReticleRectTransform;
+    private GameObject TargetedEnemy;
+    private GameObject[] CurrentWeapon;
+    private bool isTriggerHeld = false;
 
     // Life_Cycle Methods:-------------------------------------------------------------------------------------------------------
 
@@ -65,6 +88,8 @@ public class Controller_Action : NetworkBehaviour
         ReticleRectTransform = ReticleDynamic.GetComponent<RectTransform>();
         ReticleStatic.texture = ReticleStaticBlue;
         ReticleDynamic.texture = ReticleDynamicBlue;
+
+        UpdateWeaponLoadout();//--------
     }
 
     void Update()
@@ -73,7 +98,84 @@ public class Controller_Action : NetworkBehaviour
         UI_ReticleColorReactor();
     }
 
-    // Reticle Methods:=--------------------------------------------------------------------------------------------------------------
+    // Shared Data:---------------------------------------------------------------------------------------------------------------
+
+    public GameObject Targeted_Enemy() 
+    {
+        return TargetedEnemy;
+    }
+
+    //Weapons Array:--------------------------------------------------------------------------------------------------------------
+
+    public void UpdateWeaponLoadout()
+    {
+        // Get all children of Aimed_Container
+        int childCount = Aimed_Container.transform.childCount;
+        CurrentWeapon = new GameObject[childCount];
+
+        for (int i = 0; i < childCount; i++)
+        {
+            // Add each child to the CurrentWeapon array
+            CurrentWeapon[i] = Aimed_Container.transform.GetChild(i).gameObject;
+
+            GameObject weapon = CurrentWeapon[i];
+
+            // Sets active only the primary weapon at start:
+            if (weapon.GetComponent<Weapon_Stats>().Slot.Equals("Primary"))
+            {
+                weapon.SetActive(true);
+                Debug.Log(weapon.name + " enabled" + weapon.GetComponent<Weapon_Stats>().Slot);
+            }
+            else 
+            {
+                weapon.SetActive(false);
+                Debug.Log(weapon.name + " disabled" + weapon.GetComponent<Weapon_Stats>().Slot);
+            }
+
+        }
+    }
+
+    //Action Methods:-------------------------------------------------------------------------------------------------------------
+
+    public void Controller_Trigger_Attack()
+    {
+        if (IsOwner)
+        {
+            Gamepad gamepad = Gamepad.all[0];
+            bool rightTriggerPressed = gamepad.rightTrigger.ReadValue() > 0.1f; // Adjust the threshold as needed
+
+            if (rightTriggerPressed)
+            {
+                if (!isTriggerHeld)
+                {
+                    Debug.Log("Attack");
+
+                    foreach (GameObject weapon in CurrentWeapon) 
+                    {
+                        if (weapon.activeSelf) 
+                        {
+                            weapon.GetComponent<Weapon_Stats>().Fire();
+                        }
+                    }
+
+
+                    isTriggerHeld = true;
+                }
+            }
+            else
+            {
+                // Reset the flag when the trigger is released
+                isTriggerHeld = false;
+            }
+        }
+    }
+
+    public void Controller_Weapon_Swap() 
+    {
+
+    }
+
+    // Reticle Methods:------------------------------------------------------------------------------------------------------------
 
     private void UI_ReticleDynamics()
     {
@@ -123,12 +225,29 @@ public class Controller_Action : NetworkBehaviour
                 ReticleStatic.texture = ReticleStaticRed;
                 ReticleDynamic.texture = ReticleDynamicRed;
 
+                TargetedEnemy = hit.transform.gameObject;
+                //Debug.Log("Target: " + TargetedEnemy.name);
+
             }
         }
         else
         {
             ReticleStatic.texture = ReticleStaticBlue;
             ReticleDynamic.texture = ReticleDynamicBlue;
+
+            TargetedEnemy = null;
+
+            //try
+            //{
+            //    Debug.Log("Target: " + TargetedEnemy.name);
+            //}
+            //catch (Exception)
+            //{
+            //    Debug.Log("Target: Null");
+            //}
+
         }
+
     }
+
 }

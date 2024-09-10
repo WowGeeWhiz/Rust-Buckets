@@ -1,3 +1,5 @@
+using System;
+using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -9,15 +11,16 @@ using UnityEngine.UI;
 /// 
 /// Date Started: 9_1_2024
 /// 
-/// Last Updated: NULL
+/// Last Updated: 9_5_2024
 /// 
 ///  <<<DON'T TOUCH MY CODE>>>
 /// 
 /// --------------------------------------------------------------------------------------------------------
 /// 
-/// Initialization 8_20_2024:
+/// Initialization 9_1_2024:
 /// 
 /// Description:
+/// 
 /// Target Reticle set-up switches between blue as neutral to red if there is an enemy to attack.
 /// All enemies will be located in the layer mask called: Interactable, This reduces the amount of objects in the pool to check.
 /// 
@@ -35,12 +38,29 @@ using UnityEngine.UI;
 /// 
 /// --------------------------------------------------------------------------------------------------------
 /// 
+/// Patch: 9_5_2024
+/// 
+/// Description:
+/// 
+///  reticle color change as well as the fire reticle change.
+/// 
+/// Package:
+/// 
+/// N/A
+/// 
+/// Note:
+/// 
+/// N/A
+/// 
+/// --------------------------------------------------------------------------------------------------------
+/// 
 /// </summary>
 
 public class Controller_Action : NetworkBehaviour
 {
 
-    //UI
+    // Attributes:=--------------------------------------------------------------------------------------------------------------
+
     [Header("UI Variables")]
     public RawImage ReticleDynamic;
     public RawImage ReticleStatic;
@@ -49,10 +69,12 @@ public class Controller_Action : NetworkBehaviour
     public Texture ReticleDynamicBlue;
     public Texture ReticleDynamicRed;
     public GameObject Camera;
+    public GameObject Player;
     public float detectionNarrowSite;
     public float maxOffset;
 
     private RectTransform ReticleRectTransform;
+    private GameObject TargetedEnemy;
 
     // Life_Cycle Methods:-------------------------------------------------------------------------------------------------------
 
@@ -71,7 +93,14 @@ public class Controller_Action : NetworkBehaviour
         UI_ReticleColorReactor();
     }
 
-    // Reticle Methods:=--------------------------------------------------------------------------------------------------------------
+    // Reticle Methods:---------------------------------------------------------------------------------------------------------------
+
+    public GameObject Targeted_Enemy() 
+    {
+        return TargetedEnemy;
+    }
+
+    // Shared Data:-------------------------------------------------------------------------------------------------------------------
 
     private void UI_ReticleDynamics()
     {
@@ -121,12 +150,28 @@ public class Controller_Action : NetworkBehaviour
                 ReticleStatic.texture = ReticleStaticRed;
                 ReticleDynamic.texture = ReticleDynamicRed;
 
+                TargetedEnemy = hit.transform.gameObject;
+                //Debug.Log("Target: " + TargetedEnemy.name);
+
             }
         }
         else
         {
             ReticleStatic.texture = ReticleStaticBlue;
             ReticleDynamic.texture = ReticleDynamicBlue;
+
+            TargetedEnemy = null;
+
+            //try
+            //{
+            //    Debug.Log("Target: " + TargetedEnemy.name);
+            //}
+            //catch (Exception)
+            //{
+            //    Debug.Log("Target: Null");
+            //}
+
         }
     }
+
 }

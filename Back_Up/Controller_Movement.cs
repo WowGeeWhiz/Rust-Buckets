@@ -8,7 +8,7 @@ using UnityEngine.InputSystem;
 /// 
 /// Date Started: 8_20_2024
 /// 
-/// Last Updated: 8_31_2024
+/// Last Updated: 9_5_2024
 /// 
 ///  <<<DON'T TOUCH MY CODE>>>
 /// 
@@ -90,6 +90,26 @@ using UnityEngine.InputSystem;
 /// 
 /// -Added Togglable Sprint option.
 /// 
+/// --------------------------------------------------------------------------------------------------------
+/// 
+/// Patch 9_5_2024:
+/// 
+///  Description:
+///  
+/// -Added aim assist.
+/// -Added triangulated gun to camera sync.
+/// -Added camera positioning system.
+///  
+///  Package:
+///  
+///  N/A
+/// 
+///  Note:
+/// 
+///  N/A
+/// 
+/// --------------------------------------------------------------------------------------------------------
+/// 
 /// </summary>
 
 public class Controller_Movement : NetworkBehaviour
@@ -112,6 +132,12 @@ public class Controller_Movement : NetworkBehaviour
     public float maxLookUpAngle;
     public float maxLookDownAngle;
     public bool isSprintToggleMode = false; // Jake's preference setting (Add to settings menu)
+    public GameObject Aimed_Container;
+
+    [Header("Player-Camera Offset Variables")]
+    public float camX;
+    public float camY;
+    public float camZ;
 
     private bool isSprinting = false;
     private float currentVerticalRotation = 0f;
@@ -147,7 +173,7 @@ public class Controller_Movement : NetworkBehaviour
         controlsLocked = false;
 
         // Networking:
-        if (IsOwner) 
+        if (IsOwner)
         {
             OwnerClientID();
             position.Value = Player.transform.position;
@@ -166,13 +192,19 @@ public class Controller_Movement : NetworkBehaviour
             if (!controlsLocked)
             {
 
+                // Controls:
                 Contoller_Button_Sprint();
                 Controller_Button_Jump();
                 Controller_RightThumbstick_Rotation();
                 Controller_LeftThumbstick_Movement();
 
+                // Settings:
+                Aim_With_Camera_Sync();
+                //Aim_Assist();
+                UpdateCameraPosition();
+
             }
-            else 
+            else
             {
                 // Controls are locked.
             }
@@ -191,6 +223,7 @@ public class Controller_Movement : NetworkBehaviour
     {
         if (IsOwner && !onGround)
         {
+
             playerRB.AddForce(Vector3.down * gravityMagnitude * playerRB.mass);
         }
 
@@ -200,14 +233,11 @@ public class Controller_Movement : NetworkBehaviour
         // Apply linear friction to prevent sliding:
         ApplyFrictionToMovement();
 
-        // Prevents unwanted turning when moving on slopes:
-        StabilizeMovementOnSlopes();
-
     }
 
     // Locked/Unlock Controls Method:--------------------------------------------------------------------------------------
 
-    public void LockControls(bool cooldown) 
+    public void LockControls(bool cooldown)
     {
         controlsLocked = cooldown;
     }
@@ -255,7 +285,7 @@ public class Controller_Movement : NetworkBehaviour
     }
 
 
-private void Controller_Button_Jump()
+    private void Controller_Button_Jump()
     {
         if (IsOwner && Gamepad.all[0].aButton.isPressed && canJump) // Cross (X) button by default
         {
@@ -325,7 +355,7 @@ private void Controller_Button_Jump()
 
     public void Controller_LeftThumbstick_Movement()
     {
-        if (IsOwner) 
+        if (IsOwner)
         {
             Transform playerTransform = Player.transform;
             Transform cameraTransform = Camera.transform;
@@ -357,58 +387,68 @@ private void Controller_Button_Jump()
             // Move the player based on input direction relative to camera's forward direction
             playerTransform.Translate(moveDirection.normalized * currentSpeed * deltaTime, Space.World);
         }
-        
+
     }
 
-    // Physics:-------------------------------------------------------------------------------------------------------------
+    // Aim/Camera:-----------------------------------------------------------------------------------------------------------------
 
-    private void StabilizeMovementOnSlopes()
+
+    //private void Aim_Assist()
+    //{
+    //    // Reference to targeted enemy:
+    //    GameObject TargetedEnemy = Player.GetComponent<Controller_Action>().Targeted_Enemy();
+    //    // Get necessary transforms:
+    //    Transform PlayerTransform = Player.transform;
+
+    //    // Check if there is a targeted enemy:
+    //    if (TargetedEnemy != null)
+    //    {
+    //        // If you want immediate LookAt without smoothing, use this instead:
+    //        PlayerTransform.LookAt(TargetedEnemy.transform);
+    //    }
+
+    //}
+
+    void Aim_With_Camera_Sync()
     {
-        // Check if the player is on the ground
-        if (onGround)
+
+        // Create a ray from the camera in the direction it is looking
+        Ray ray = new Ray(Camera.transform.position, Camera.transform.forward);
+        RaycastHit hit;
+
+        // Perform the raycast
+        if (Physics.Raycast(ray, out hit))
         {
-            // Get the current velocity
-            Vector3 velocity = playerRB.velocity;
-
-            // Cast a ray downward from the player's position to detect the ground below
-            RaycastHit hit;
-            if (Physics.Raycast(Player.transform.position + Vector3.up * 0.1f, Vector3.down, out hit, 2f))
+            if (!hit.collider.CompareTag("Player")) 
             {
-                // Calculate the slope normal
-                Vector3 slopeNormal = hit.normal;
+                // Calculate the direction to the hit point
+                Vector3 directionToHit = hit.point - Aimed_Container.transform.position;
 
-                // Project the velocity onto the plane defined by the slope's normal
-                Vector3 slopeVelocity = Vector3.ProjectOnPlane(velocity, slopeNormal);
-
-                // Check if the y velocity is increasing (ascending)
-                bool isAscending = velocity.y > 0;
-
-                if (isAscending)
-                {
-                    // When ascending or on flat terrain, apply smoothing
-                    float smoothingFactor = 0.8f; // Smoothing factor for ascending
-                    playerRB.velocity = Vector3.Lerp(velocity, slopeVelocity, smoothingFactor * Time.fixedDeltaTime);
-
-                    // Limit excessive upward movement while on the ground
-                    if (velocity.y > 0)
-                    {
-                        playerRB.velocity = new Vector3(playerRB.velocity.x, Mathf.Min(velocity.y, 0), playerRB.velocity.z);
-                    }
-                }
-                else
-                {
-                    // If descending, leave the velocity unchanged
-                    // You might still want to ensure smooth descending if needed
-                    // For now, this code does not apply additional changes for descending
-                }
+                // Adjust the Aimed_Container's rotation to face the hit point
+                Aimed_Container.transform.rotation = Quaternion.LookRotation(directionToHit);
             }
         }
     }
 
+    public void UpdateCameraPosition()
+    {
+        if (Camera != null && Player != null)
+        {
+            // Define the desired offset from the player
+            Vector3 offset = new Vector3(camX, camY, camZ); // Example offset values, adjust as needed
+
+            // Calculate the desired position of the camera
+            Vector3 desiredCameraPosition = Player.transform.position + offset;
+
+            // Update the camera's position to match the desired position
+            Camera.transform.position = desiredCameraPosition;
+        }
+    }
 
 
+    // Physics:-------------------------------------------------------------------------------------------------------------
 
-    private void ApplyFrictionToRotation()
+    public void ApplyFrictionToRotation()
     {
         // Get current angular velocity:
         Vector3 angularVelocity = playerRB.angularVelocity;
@@ -422,7 +462,7 @@ private void Controller_Button_Jump()
         playerRB.angularVelocity = angularVelocity;
     }
 
-    private void ApplyFrictionToMovement()
+    public void ApplyFrictionToMovement()
     {
         // Check if there's no movement input from the player:
         Gamepad gamepad = Gamepad.all[0];
@@ -478,19 +518,19 @@ private void Controller_Button_Jump()
 
     // Client ID:
 
-    private void OwnerClientID() 
+    private void OwnerClientID()
     {
         Debug.Log($"Player {NetworkObject.OwnerClientId} is you Client ID");
     }
 
     // Network Position Data:
 
-    public void UpdateNetworkPosition() 
+    public void UpdateNetworkPosition()
     {
         position.Value = Player.transform.position;
     }
 
-    private void UpdateLocalPosition() 
+    private void UpdateLocalPosition()
     {
         Player.transform.position = position.Value;
     }

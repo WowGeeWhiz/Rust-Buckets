@@ -1,3 +1,4 @@
+using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -8,7 +9,7 @@ using UnityEngine.InputSystem;
 /// 
 /// Date Started: 8_20_2024
 /// 
-/// Last Updated: 8_31_2024
+/// Last Updated: 9_5_2024
 /// 
 ///  <<<DON'T TOUCH MY CODE>>>
 /// 
@@ -90,6 +91,26 @@ using UnityEngine.InputSystem;
 /// 
 /// -Added Togglable Sprint option.
 /// 
+/// --------------------------------------------------------------------------------------------------------
+/// 
+/// Patch 9_5_2024:
+/// 
+///  Description:
+///  
+/// -Added aim assist.
+/// -Added triangulated gun to camera sync.
+/// -Added camera positioning system.
+///  
+///  Package:
+///  
+///  N/A
+/// 
+///  Note:
+/// 
+///  N/A
+/// 
+/// --------------------------------------------------------------------------------------------------------
+/// 
 /// </summary>
 
 public class Controller_Movement : NetworkBehaviour
@@ -112,6 +133,13 @@ public class Controller_Movement : NetworkBehaviour
     public float maxLookUpAngle;
     public float maxLookDownAngle;
     public bool isSprintToggleMode = false; // Jake's preference setting (Add to settings menu)
+    public GameObject Aimed_Container;
+    public float verticalOffset;
+
+    [Header("Player-Camera Offset Variables")]
+    public float camX;
+    public float camY;
+    public float camZ;
 
     private bool isSprinting = false;
     private float currentVerticalRotation = 0f;
@@ -121,7 +149,6 @@ public class Controller_Movement : NetworkBehaviour
     private bool canJump;
     private float initialWalkSpeed;
     private bool controlsLocked;
-
 
     // Networking:
     private readonly NetworkVariable<Vector3> position = new();
@@ -160,33 +187,31 @@ public class Controller_Movement : NetworkBehaviour
     {
         if (IsOwner)
         {
-
             Physics_RemainUpright();
 
             if (!controlsLocked)
             {
-
+                // Controls:
                 Contoller_Button_Sprint();
                 Controller_Button_Jump();
                 Controller_RightThumbstick_Rotation();
                 Controller_LeftThumbstick_Movement();
+                Player.GetComponent<Controller_Action>().Controller_Trigger_Attack();
 
-            }
-            else
-            {
-                // Controls are locked.
+                // Settings:
+                Aim_With_Camera_Sync();
+                UpdateCameraPosition();
+
             }
 
             // Host Network Update:
             UpdateNetworkPosition();
         }
 
-        //Client Network Update:
+        // Client Network Update:
         UpdateLocalPosition();
-
     }
 
-    // Custom Gravity:
     private void FixedUpdate()
     {
         if (IsOwner && !onGround)
@@ -199,7 +224,6 @@ public class Controller_Movement : NetworkBehaviour
 
         // Apply linear friction to prevent sliding:
         ApplyFrictionToMovement();
-
     }
 
     // Locked/Unlock Controls Method:--------------------------------------------------------------------------------------
@@ -223,13 +247,11 @@ public class Controller_Movement : NetworkBehaviour
                 // Toggle mode:
                 if (sprintButtonPressed && !isSprinting)
                 {
-                    // Start sprinting:
                     walkSpeed = sprintSpeed;
                     isSprinting = true;
                 }
                 else if (sprintButtonPressed && isSprinting)
                 {
-                    // Stop sprinting:
                     walkSpeed = initialWalkSpeed;
                     isSprinting = false;
                 }
@@ -239,22 +261,19 @@ public class Controller_Movement : NetworkBehaviour
                 // Hold down mode:
                 if (sprintButtonPressed)
                 {
-                    // Start sprinting:
                     walkSpeed = sprintSpeed;
                 }
                 else
                 {
-                    // Stop sprinting:
                     walkSpeed = initialWalkSpeed;
                 }
             }
         }
     }
 
-
     private void Controller_Button_Jump()
     {
-        if (IsOwner && Gamepad.all[0].aButton.isPressed && canJump) // Cross (X) button by default
+        if (IsOwner && Gamepad.all[0].aButton.isPressed && canJump)
         {
             playerRB.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
             canJump = false;
@@ -271,15 +290,12 @@ public class Controller_Movement : NetworkBehaviour
 
             int inversion = invertVertical ? 1 : -1;
 
-            // Right Thumbstick:
             Vector2 rightStick = gamepad.rightStick.ReadValue();
             float horizontalRight = rightStick.x;
             float verticalRight = rightStick.y;
 
-            // Deadzone value:
             float deadzone = 0.1f;
 
-            // Apply deadzone:
             if (rightStick.magnitude < deadzone)
             {
                 horizontalRight = 0;
@@ -287,13 +303,11 @@ public class Controller_Movement : NetworkBehaviour
             }
             else
             {
-                // Normalize the input to ensure consistent speed in all directions
                 Vector2 normalizedInput = rightStick.normalized;
                 horizontalRight = normalizedInput.x * sensitivityHorizontal;
                 verticalRight = normalizedInput.y * sensitivityVertical;
             }
 
-            // Check if the magnitude of right thumbstick input is above the deadzone:
             if (horizontalRight != 0 || verticalRight != 0)
             {
                 // Rotate the player around its own up axis based on horizontal right thumbstick input:
@@ -303,22 +317,16 @@ public class Controller_Movement : NetworkBehaviour
                 }
                 else
                 {
-                    // Update the vertical rotation angle and clamp it:
                     float newVerticalRotation = currentVerticalRotation + (inversion * verticalRight * rotationSpeed * Time.deltaTime);
                     newVerticalRotation = Mathf.Clamp(newVerticalRotation, -maxLookDownAngle, maxLookUpAngle);
-
-                    // Calculate the rotation difference:
                     float rotationDifference = newVerticalRotation - currentVerticalRotation;
-
-                    // Apply the clamped rotation difference:
                     cameraTransform.RotateAround(playerTransform.position, cameraTransform.right, rotationDifference);
-
-                    // Update the current vertical rotation:
                     currentVerticalRotation = newVerticalRotation;
                 }
             }
         }
     }
+
 
     public void Controller_LeftThumbstick_Movement()
     {
@@ -328,97 +336,123 @@ public class Controller_Movement : NetworkBehaviour
             Transform cameraTransform = Camera.transform;
             Gamepad gamepad = Gamepad.all[0];
 
-            // Left Thumbstick:
             Vector2 leftStick = gamepad.leftStick.ReadValue();
             float horizontalLeft = leftStick.x;
             float verticalLeft = leftStick.y;
 
-            // Adjust sensitivity
             horizontalLeft *= sensitivityMovement;
             verticalLeft *= sensitivityMovement;
 
-            // Rotate the player based on camera rotation
             playerTransform.rotation = Quaternion.Euler(0, cameraTransform.eulerAngles.y, 0);
 
-            // Store Time.deltaTime in a variable to reduce redundant calls
             float deltaTime = Time.deltaTime;
-
-            // Accelerate or decelerate based on thumbstick input magnitude
             float inputMagnitude = new Vector2(horizontalLeft, verticalLeft).magnitude;
             currentSpeed = inputMagnitude * walkSpeed;
 
-            // Calculate move direction relative to camera's forward direction (ignore Y axis)
             Vector3 moveDirection = horizontalLeft * cameraTransform.right + verticalLeft * cameraTransform.forward;
-            moveDirection.y = 0; // Ignore Y axis
+            moveDirection.y = 0;
 
-            // Move the player based on input direction relative to camera's forward direction
             playerTransform.Translate(moveDirection.normalized * currentSpeed * deltaTime, Space.World);
         }
+    }
 
+    // Aim/Camera:-----------------------------------------------------------------------------------------------------------------
+
+    //void Aim_With_Camera_Sync()
+    //{
+    //    Ray ray = new Ray(Camera.transform.position, Camera.transform.forward);
+    //    RaycastHit hit;
+
+    //    if (Physics.Raycast(ray, out hit))
+    //    {
+    //        if (!hit.collider.CompareTag("Player"))
+    //        {
+    //            Vector3 directionToHit = hit.point - Aimed_Container.transform.position;
+    //            Aimed_Container.transform.rotation = Quaternion.LookRotation(directionToHit);
+    //        }
+    //    }
+    //}
+
+    void Aim_With_Camera_Sync()
+    {
+
+        Ray ray = new Ray(Camera.transform.position, Camera.transform.forward);
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out hit))
+        {
+            if (!hit.collider.CompareTag("Player"))
+            {
+                // Calculate the direction to the hit point
+                Vector3 directionToHit = hit.point - Aimed_Container.transform.position;
+
+                // Apply the vertical offset
+                // Calculate offset direction in the vertical plane
+                Vector3 offsetDirection = Quaternion.Euler(verticalOffset, 0, 0) * directionToHit;
+
+                // Set the rotation of Aimed_Container
+                Aimed_Container.transform.rotation = Quaternion.LookRotation(offsetDirection);
+            }
+        }
+    }
+
+    public void UpdateCameraPosition()
+    {
+        if (Camera != null && Player != null)
+        {
+            Vector3 offset = new Vector3(camX, camY, camZ);
+            Quaternion playerRotation = Player.transform.rotation;
+            Vector3 rotatedOffset = playerRotation * offset;
+            Vector3 desiredCameraPosition = Player.transform.position + rotatedOffset;
+
+            Camera.transform.position = desiredCameraPosition;
+        }
     }
 
     // Physics:-------------------------------------------------------------------------------------------------------------
 
-    private void ApplyFrictionToRotation()
+    public void ApplyFrictionToRotation()
     {
-        // Get current angular velocity:
         Vector3 angularVelocity = playerRB.angularVelocity;
-
-        // Apply damping/friction to reduce unwanted spinning:
-        angularVelocity.x *= 0.9f; // (Adjust the factor as needed (0.9 means 10% reduction))
-        angularVelocity.z *= 0.9f; // (Dampen x and z to reduce horizontal spinning)
-        angularVelocity.y *= 0.9f; // (Optional: Dampen y if needed)
-
-        // Update the Rigidbody's angular velocity with damped values:
+        angularVelocity.x *= 0.9f;
+        angularVelocity.z *= 0.9f;
+        angularVelocity.y *= 0.9f;
         playerRB.angularVelocity = angularVelocity;
     }
 
-    private void ApplyFrictionToMovement()
+    public void ApplyFrictionToMovement()
     {
-        // Check if there's no movement input from the player:
         Gamepad gamepad = Gamepad.all[0];
         Vector2 leftStickInput = gamepad.leftStick.ReadValue();
 
-        // If no input on left thumbstick, apply friction:
-        if (leftStickInput.magnitude < 0.1f) // (Adjust the threshold as needed)
+        if (leftStickInput.magnitude < 0.1f)
         {
-            // Get current velocity:
             Vector3 velocity = playerRB.velocity;
-
-            // Apply damping/friction to horizontal velocity (X and Z):
-            velocity.x *= 0.9f; // (Reduce sliding on the X-axis)
-            velocity.z *= 0.9f; // (Reduce sliding on the Z-axis)
-
-            // Update the Rigidbody's velocity with damped values:
+            velocity.x *= 0.9f;
+            velocity.z *= 0.9f;
             playerRB.velocity = velocity;
         }
     }
 
     private void Physics_RemainUpright()
     {
-        // Keep upright:
         Vector3 currentEulerAngles = transform.rotation.eulerAngles;
         currentEulerAngles.x = 0;
         currentEulerAngles.z = 0;
-
-        // Apply corrected rotation:
         transform.rotation = Quaternion.Euler(currentEulerAngles);
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-        // On Ground:
         if (collision.gameObject.CompareTag("Ground"))
         {
             onGround = true;
             canJump = true;
         }
-
     }
 
     private void OnCollisionExit(Collision collision)
     {
-        // Off Ground:
         if (collision.gameObject.CompareTag("Ground"))
         {
             onGround = false;
@@ -427,14 +461,10 @@ public class Controller_Movement : NetworkBehaviour
 
     // Networking:-----------------------------------------------------------------------------------------------------------
 
-    // Client ID:
-
     private void OwnerClientID()
     {
         Debug.Log($"Player {NetworkObject.OwnerClientId} is you Client ID");
     }
-
-    // Network Position Data:
 
     public void UpdateNetworkPosition()
     {
@@ -446,8 +476,6 @@ public class Controller_Movement : NetworkBehaviour
         Player.transform.position = position.Value;
     }
 
-    // Network Synchronization of Data:
-
     private void OnNetworkPositionChanged(Vector3 oldValue, Vector3 newValue)
     {
         if (!IsOwner)
@@ -455,5 +483,4 @@ public class Controller_Movement : NetworkBehaviour
             Player.transform.position = newValue;
         }
     }
-
 }
