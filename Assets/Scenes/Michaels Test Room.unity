@@ -590,6 +590,7 @@ MonoBehaviour:
   flagReturnAura: {fileID: 852922390}
   gameManager: {fileID: 511641637}
   CTFParent: {fileID: 678577783}
+  flagReturnTime: 10
 --- !u!54 &337453860
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -794,7 +795,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 511641639}
-  - component: {fileID: 511641638}
+  - component: {fileID: 511641640}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -802,24 +803,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &511641638
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 511641637}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 83b36863894a18b4094393d1396e2b39, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  redFlag: {fileID: 0}
-  blueFlag: {fileID: 0}
-  redFlagPoint: {fileID: 0}
-  blueFlagPoint: {fileID: 0}
-  redFlagPointRadius: {fileID: 0}
-  blueFlagPointRadius: {fileID: 0}
 --- !u!4 &511641639
 Transform:
   m_ObjectHideFlags: 0
@@ -835,6 +818,22 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 11
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &511641640
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 511641637}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a5a979bef75adc42a29b70efbb3d8a4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  redTeamScore: 0
+  blueTeamScore: 0
+  targetScore: 0
+  mode: 
 --- !u!1 &559579927
 GameObject:
   m_ObjectHideFlags: 0
@@ -2518,6 +2517,7 @@ MonoBehaviour:
   flagReturnAura: {fileID: 2147227425}
   gameManager: {fileID: 511641637}
   CTFParent: {fileID: 678577783}
+  flagReturnTime: 10
 --- !u!54 &1550739608
 Rigidbody:
   m_ObjectHideFlags: 0
