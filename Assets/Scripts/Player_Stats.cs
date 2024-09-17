@@ -32,8 +32,7 @@ using UnityEngine;
 
 public class Player_Stats : NetworkBehaviour
 {
-    // Attributes:=--------------------------------------------------------------------------------------------------------------
-
+    // Attributes
     [Header("Player Stats Variables")]
     public GameObject[] HealthIndicators = new GameObject[8];
     public Material Health;
@@ -56,8 +55,6 @@ public class Player_Stats : NetworkBehaviour
         ColorUtility.TryParseHtmlString("#000000", out var c8) ? c8 : Color.white  // Ignored
     };
 
-    // Life_Cycle Methods:-------------------------------------------------------------------------------------------------------
-
     // Start is called before the first frame update
     void Start()
     {
@@ -66,34 +63,23 @@ public class Player_Stats : NetworkBehaviour
         playerHP = maxHP; // Initialize playerHP to maxHP
 
         ApplyMaterialToObjects();
-
-        // Set initial material color
         UpdateMaterialColor();
-
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
-    // Health Methods:-------------------------------------------------------------------------------------------------------
-
+    // Apply material to health indicators
     void ApplyMaterialToObjects()
     {
         foreach (GameObject obj in HealthIndicators)
         {
-            // Check if the object has a Renderer component
             Renderer renderer = obj.GetComponent<Renderer>();
             if (renderer != null)
             {
-                // Apply the material to the object's renderer
                 renderer.material = Health;
             }
         }
     }
 
+    // Restore full HP gradually
     public void RestoreFullHP()
     {
         StartCoroutine(RestoreFullHPCoroutine());
@@ -103,98 +89,95 @@ public class Player_Stats : NetworkBehaviour
     {
         float targetHP = maxHP;
 
-        while (playerHP < targetHP)
-        {
-            for (int i = HealthIndicators.Length - 1; i >= 0; i--)
-            {
-                GameObject hpIndicator = HealthIndicators[i];
-
-                // Check if the indicator is inactive and if the playerHP is less than maxHP
-                if (!hpIndicator.activeSelf)
-                {
-                    // Reactivate the health indicator
-                    hpIndicator.SetActive(true);
-
-                    // Increase playerHP by the HP value represented by this indicator
-                    playerHP = Mathf.Min(playerHP + hpPerIndicator, maxHP);
-                    Debug.Log($"Reactivated health indicator at index {i}: {hpIndicator.name}. Player HP: {playerHP}");
-
-                    // Wait for the specified delay before processing the next indicator
-                    yield return new WaitForSeconds(revealDelay);
-                }
-            }
-            UpdateMaterialColor(); // Update color after reactivating indicators
-            yield return null; // Yield control to the next frame
-        }
-    }
-
-    public void TakeDamage(float damage)
-    {
-        // Apply damage to player HP
-        playerHP = Mathf.Max(playerHP - damage, 0);
-
-        // Deactivate health indicators based on damage
-        UpdateHealthIndicators();
-        UpdateMaterialColor(); // Update color after deactivating indicators
-    }
-
-    private void UpdateHealthIndicators()
-    {
-        float currentHP = playerHP;
-
-        for (int i = HealthIndicators.Length - 1; i >= 0; i--)
+        for (int i = 0; i < HealthIndicators.Length && playerHP < targetHP; i++)
         {
             GameObject hpIndicator = HealthIndicators[i];
 
-            // Calculate the HP range for this indicator
-            float indicatorHPMin = i * hpPerIndicator;
-            float indicatorHPMax = indicatorHPMin + hpPerIndicator;
-
-            // Check if current HP falls within this indicator's range
-            if (currentHP < indicatorHPMin)
+            if (!hpIndicator.activeSelf)
             {
-                // Deactivate if HP is below this indicator's range
-                hpIndicator.SetActive(false);
-            }
-            else
-            {
-                // Reactivate if HP is above this indicator's range
                 hpIndicator.SetActive(true);
+                playerHP = Mathf.Min(playerHP + hpPerIndicator, maxHP);
+                Debug.Log($"Reactivated health indicator at index {i}. Player HP: {playerHP}");
+
+                UpdateMaterialColor();
+                yield return new WaitForSeconds(revealDelay);
             }
         }
+
+        playerHP = maxHP; // Ensure HP is fully restored to 100
+        UpdateMaterialColor();
     }
 
-    private void UpdateMaterialColor()
+    // Handle taking damage
+    public void TakeDamage(float damage)
     {
-        int activeIndicators = 0;
-        for (int i = 0; i < HealthIndicators.Length; i++)
+        playerHP = Mathf.Max(playerHP - damage, 0);
+        UpdateHealthIndicators();
+        UpdateMaterialColor();
+    }
+
+    // Update health indicators based on current HP
+    private void UpdateHealthIndicators()
+    {
+        for (int i = HealthIndicators.Length - 1; i >= 0; i--)
         {
-            if (HealthIndicators[i].activeSelf)
+            GameObject hpIndicator = HealthIndicators[i];
+            float indicatorHPMin = i * hpPerIndicator;
+
+            // Hide all indicators if health reaches 0
+            if (playerHP == 0)
             {
-                activeIndicators++;
+                hpIndicator.SetActive(false);
+            }
+            // Otherwise, deactivate indicators based on player HP
+            else if (playerHP < indicatorHPMin)
+            {
+                hpIndicator.SetActive(false);
             }
         }
 
-        // Determine color based on the number of active indicators
+        UpdateMaterialColor();
+    }
+
+    // Update material color based on health
+    private void UpdateMaterialColor()
+    {
+        float healthPercentage = playerHP / maxHP;
+
         Color color;
-        if (activeIndicators == HealthIndicators.Length)
+        if (healthPercentage == 1f)
         {
             color = Colors[0]; // Full health
         }
-        else if (activeIndicators > 5)
+        else if (healthPercentage > 0.875f)
         {
-            color = Colors[3]; // More than 5 indicators
+            color = Colors[1];
         }
-        else if (activeIndicators > 1)
+        else if (healthPercentage > 0.75f)
         {
-            color = Colors[4]; // Between 2 and 5 indicators
+            color = Colors[2];
+        }
+        else if (healthPercentage > 0.625f)
+        {
+            color = Colors[3];
+        }
+        else if (healthPercentage > 0.5f)
+        {
+            color = Colors[4];
+        }
+        else if (healthPercentage > 0.375f)
+        {
+            color = Colors[5];
+        }
+        else if (healthPercentage > 0.25f)
+        {
+            color = Colors[6];
         }
         else
         {
-            color = Colors[6]; // Only 1 indicator left
+            color = Colors[6]; // Critical health
         }
 
-        // Apply the color to the material
         Health.color = color;
     }
 }
