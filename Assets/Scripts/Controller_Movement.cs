@@ -111,6 +111,21 @@ using UnityEngine.InputSystem;
 /// 
 /// --------------------------------------------------------------------------------------------------------
 /// 
+/// Patch 9_17_2024:
+/// 
+///  Description:
+///  
+/// -Added getter and setters for: invertVertical & isSprintToggleMode.
+///  
+///  Package:
+///  
+///  N/A
+/// 
+///  Note:
+/// 
+///  N/A
+/// 
+/// --------------------------------------------------------------------------------------------------------
 /// </summary>
 
 public class Controller_Movement : NetworkBehaviour
@@ -225,6 +240,31 @@ public class Controller_Movement : NetworkBehaviour
         // Apply linear friction to prevent sliding:
         ApplyFrictionToMovement();
     }
+
+    // Getter & Setters:---------------------------------------------------------------------------------------------------
+
+    // Getter and Setter for isSprintToggleMode
+    public bool GetSprintToggleMode()
+    {
+        return isSprintToggleMode;
+    }
+
+    public void SetSprintToggleMode(bool value)
+    {
+        isSprintToggleMode = value;
+    }
+
+    // Getter and Setter for invertVertical
+    public bool GetInvertVertical()
+    {
+        return invertVertical;
+    }
+
+    public void SetInvertVertical(bool value)
+    {
+        invertVertical = value;
+    }
+
 
     // Locked/Unlock Controls Method:--------------------------------------------------------------------------------------
 
