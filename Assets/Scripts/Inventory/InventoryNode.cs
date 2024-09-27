@@ -1,10 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class InventoryNode : InventoryContainer
 {
-    public GameObject item; //replace with actual item script, dont rename
+    public Item item; 
 
     private InventoryNode next;
     public ref InventoryNode Next()
@@ -14,17 +15,6 @@ public class InventoryNode : InventoryContainer
     public void SetNext(ref InventoryNode newNext)
     {
         next = newNext;
-    }
-
-    private InventoryNode nextEquipped;
-    public ref InventoryNode NextEquipped()
-    {
-
-        return ref nextEquipped;
-    }
-    public void SetNextEquipped(InventoryNode newEquipped)
-    {
-        nextEquipped = newEquipped;
     }
 
     /*may not be necessary */
@@ -37,9 +27,28 @@ public class InventoryNode : InventoryContainer
     //*/
 
 
-    public InventoryNode(ref GameObject inputItem, int inputPosition)
+    public InventoryNode(ref Item inputItem, int inputPosition)
     {
         item = inputItem;
         listPosition = inputPosition;
+    }
+
+    public List<Item> GetItemsRecursiveStart()
+    {
+        List<Item> list = new List<Item>();
+
+        list = GetItemsRecursive(list);
+        return list;
+    }
+
+
+    public List<Item> GetItemsRecursive(List<Item> list)
+    {
+        list.Add(item);
+        if (next != null)
+        {
+            return next.GetItemsRecursive(list);
+        }
+        return list;
     }
 }
