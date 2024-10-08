@@ -8,7 +8,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Michaels Server Test.unity
     guid: 559444d85a9fbeb48b7b5180df059150
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Michaels Test Room.unity
     guid: 91522d06fef924c43b052182f80defab
   m_configObjects: {}
