@@ -1,24 +1,39 @@
 using Fusion;
 using UnityEngine;
 
-public class Fusion_Spawner : SimulationBehaviour, IPlayerJoined
+public class Fusion_Spawner : NetworkBehaviour, IPlayerJoined, IPlayerLeft
 {
 
-    public GameObject PlayerPrefab;
+    [SerializeField] private NetworkPrefabRef PlayerPrefab;
+
+    [Networked, Capacity(6)] private NetworkDictionary<PlayerRef, Fusion_Player> Players => default;
 
     public GameObject[] spawnPoints;
 
     public void PlayerJoined(PlayerRef player) 
     {
 
-        if (Runner.LocalPlayer == player) 
+        if (HasStateAuthority) 
         {
 
             Vector3 spawnPosition = GetSpawnPosition();
 
-            Runner.Spawn(PlayerPrefab, spawnPosition, Quaternion.identity, player);
+            NetworkObject PlayerObject = Runner.Spawn(PlayerPrefab, spawnPosition, Quaternion.identity, player);
+            Players.Add(player, PlayerObject.GetComponent<Fusion_Player>());
         }
 
+    }
+
+    public void PlayerLeft(PlayerRef player)
+    {
+        if (!HasStateAuthority) 
+            return;
+
+        if (Players.TryGet(player, out Fusion_Player playerBehaviour)) 
+        {
+            Players.Remove(player);
+            Runner.Despawn(playerBehaviour.Object);
+        }
     }
 
     private Vector3 GetSpawnPosition()
@@ -28,5 +43,4 @@ public class Fusion_Spawner : SimulationBehaviour, IPlayerJoined
         return spawnPoints[Random.Range(0, spawnPoints.Length)].transform.position;
 
     }
-
 }
