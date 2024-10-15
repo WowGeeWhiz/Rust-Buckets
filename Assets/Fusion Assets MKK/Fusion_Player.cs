@@ -22,6 +22,7 @@ public class Fusion_Player : NetworkBehaviour
 
         if (HasInputAuthority) 
         {
+
             Name = PlayerPrefs.GetString("Username");
             RPC_PlayerName(Name);
             Fusion_Camera_Follow.Singleton.SetTarget(camTarget);
@@ -90,7 +91,7 @@ public class Fusion_Player : NetworkBehaviour
         if (input.Direction.magnitude > 0.1f)  // Adjust threshold if needed
         {
 
-            Debug.LogWarning("Player: " + this.Name + "Is trying to move or is moving.");
+            Debug.LogWarning("Player: " + Name + "Is trying to move or is moving.");
             // Player is moving, set to run state
             playerStateMachine.TransitionToState(Fusion_Player_StateMachine.PlayerState.Run);
         }
@@ -98,7 +99,7 @@ public class Fusion_Player : NetworkBehaviour
         {
             // No significant input, set to idle state
             playerStateMachine.TransitionToState(Fusion_Player_StateMachine.PlayerState.Idle);
-            Debug.LogWarning("Player: " + this.Name + "Is idle.");
+            Debug.LogWarning("Player: " + Name + "Is idle.");
         }
     }
 
