@@ -11,7 +11,7 @@ public class Fusion_NetInputManager : SimulationBehaviour, IBeforeUpdate, INetwo
 
     private Fusion_NetInput accumulatedInput;
     private bool resetInput;
-    private readonly int speed = 300;
+    private readonly int speed = 7000;
 
     public void BeforeUpdate()
     {
@@ -65,7 +65,7 @@ public class Fusion_NetInputManager : SimulationBehaviour, IBeforeUpdate, INetwo
             Vector2 lookRotationDelta = new(-rightStickDelta.y, rightStickDelta.x);
             accumulatedInput.LookDelta += lookRotationDelta;
 
-            Debug.LogWarning($"Right Stick Delta: {rightStickDelta}, Look Rotation Delta: {lookRotationDelta}");
+            //Debug.LogWarning($"Right Stick Delta: {rightStickDelta}, Look Rotation Delta: {lookRotationDelta}");
         }
 
         if (gamepad != null) 
@@ -76,8 +76,8 @@ public class Fusion_NetInputManager : SimulationBehaviour, IBeforeUpdate, INetwo
             if (gamepad.leftStick.ReadValue().magnitude > 0.1f) 
             {
                 Vector2 leftStick = gamepad.leftStick.ReadValue();
-                float horizontalLeft = leftStick.x * speed;
-                float verticalLeft = leftStick.y * speed;
+                float horizontalLeft = leftStick.x * speed * Time.fixedDeltaTime;
+                float verticalLeft = leftStick.y * speed * Time.fixedDeltaTime;
 
                 moveDirection = new Vector2(horizontalLeft, verticalLeft);
             }
