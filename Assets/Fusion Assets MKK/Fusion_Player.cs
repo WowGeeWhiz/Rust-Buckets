@@ -11,7 +11,7 @@ public class Fusion_Player : NetworkBehaviour
     [SerializeField] private bool invertVertical = true;
     [SerializeField] private float deadzone = 0.7f;
 
-    private Fusion_Player_StateMachine playerStateMachine;//------------------
+    //private Fusion_Player_StateMachine playerStateMachine;//------------------
 
     [Networked] public string Name { get; private set; }
     [Networked] private NetworkButtons previousButtons { get; set; }
@@ -27,7 +27,7 @@ public class Fusion_Player : NetworkBehaviour
             RPC_PlayerName(Name);
             Fusion_Camera_Follow.Singleton.SetTarget(camTarget);
 
-            playerStateMachine = GetComponent<Fusion_Player_StateMachine>();//------------------
+            //playerStateMachine = GetComponent<Fusion_Player_StateMachine>();//------------------
         }
     }
 
@@ -36,7 +36,7 @@ public class Fusion_Player : NetworkBehaviour
         if (GetInput(out Fusion_NetInput input)) 
         {
 
-            UpdateMovementState(input);//------------------
+            //UpdateMovementState(input);//------------------
 
             //Look inversion:
             int inversion = invertVertical ? -1 : 1;
@@ -85,23 +85,23 @@ public class Fusion_Player : NetworkBehaviour
         camTarget.localRotation = Quaternion.Euler(kcc.GetLookRotation().x, 0f, 0f);
     }
 
-    private void UpdateMovementState(Fusion_NetInput input)//------------------
-    {
-        // Check if the left thumbstick is being moved
-        if (input.Direction.magnitude > 0.1f)  // Adjust threshold if needed
-        {
+    //private void UpdateMovementState(Fusion_NetInput input)//------------------
+    //{
+    //    // Check if the left thumbstick is being moved
+    //    if (input.Direction.magnitude > 0.1f)  // Adjust threshold if needed
+    //    {
 
-            Debug.LogWarning("Player: " + Name + "Is trying to move or is moving.");
-            // Player is moving, set to run state
-            playerStateMachine.TransitionToState(Fusion_Player_StateMachine.PlayerState.Run);
-        }
-        else
-        {
-            // No significant input, set to idle state
-            playerStateMachine.TransitionToState(Fusion_Player_StateMachine.PlayerState.Idle);
-            Debug.LogWarning("Player: " + Name + "Is idle.");
-        }
-    }
+    //        Debug.LogWarning("Player: " + Name + "Is trying to move or is moving.");
+    //        // Player is moving, set to run state
+    //        playerStateMachine.TransitionToState(Fusion_Player_StateMachine.PlayerState.Run);
+    //    }
+    //    else
+    //    {
+    //        // No significant input, set to idle state
+    //        playerStateMachine.TransitionToState(Fusion_Player_StateMachine.PlayerState.Idle);
+    //        Debug.LogWarning("Player: " + Name + "Is idle.");
+    //    }
+    //}
 
     // Holds Player Name:
     [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
