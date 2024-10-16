@@ -19,6 +19,7 @@ public class Flag : MonoBehaviour
 
     Vector3 initialFlagPosition;
 
+    public float flagReturnTime = 10.0f;
 
     // Start is called before the first frame update
     void Start()
@@ -29,17 +30,35 @@ public class Flag : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
-    }
-    public void ReturnFlag()
-    {
-        //this is currently empty and this method may not be filled at all.
-        //This is just to remember that I need to implement something that makes flags return to default position after x amount of time
-        //or a player stands in flagReturnAura for x/someValue amount of time
+        //returns flag after it's on the ground for 10 seconds
+        //currently untested. probably works
+        //checks if flag is attached to aan object
+        if(!this.transform.IsChildOf(transform))
+        {
+            flagReturnTime -= Time.fixedDeltaTime;
+        }
+        if(flagReturnTime <= 0 )
+        {
+            flagReturnTime = 10.0f;
+            this.gameObject.transform.SetParent(CTFParent.gameObject.transform);
+            this.transform.position = initialFlagPosition;
+        }
+
+
+        /*
+         * makes the flag fall to the ground if a player dies while holding it
+         * psuedocode right now because I'm not really sure how a player death is handled or can be called like this
+         * the games also not really in a state where that's easily tested
+         * if(player.dies){
+         *      this.transform.parent = null;
+         *      this.gameObject.GetComponent<Rigidbody>().useGravity = true;
+         * }
+         */
     }
 
     public void OnCollisionEnter(Collision collision)
     {
+        this.gameObject.GetComponent<Rigidbody>().useGravity = false;
         //As far as I can tell there isn't anything in the player script that differentiates teams, so this will need to be reworked
         if (collision.gameObject.tag == "Player")
         {
