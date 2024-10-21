@@ -38,24 +38,26 @@ public class Fusion_NetInputManager : SimulationBehaviour, IBeforeUpdate, INetwo
             gamepad.dpad.left.wasPressedThisFrame || // D-Pad left
             gamepad.dpad.right.wasPressedThisFrame || // D-Pad right
             gamepad.leftStick.ReadValue().magnitude > 0.1f ||  // Detect left stick movement
-            gamepad.rightStick.ReadValue().magnitude > 0.1f    // Detect right stick movement
+            gamepad.rightStick.ReadValue().magnitude > 0.1f ||   // Detect right stick movement
+            gamepad.selectButton.wasPressedThisFrame || // Share button
+            gamepad.startButton.wasPressedThisFrame    // Options button
         ))
         {
-            if (Cursor.lockState == CursorLockMode.Locked)
-            {
-                Cursor.lockState = CursorLockMode.None;
-                Cursor.visible = true;
-            }
-            else
-            {
-                Cursor.lockState = CursorLockMode.Locked;
-                Cursor.visible = false;
-            }
+            //if (Cursor.lockState == CursorLockMode.Locked)
+            //{
+            //    Cursor.lockState = CursorLockMode.None;
+            //    Cursor.visible = true;
+            //}
+            //else
+            //{
+            //    Cursor.lockState = CursorLockMode.Locked;
+            //    Cursor.visible = false;
+            //}
         }
 
         //accumulate input only if the cursor is locked:
-        if (Cursor.lockState != CursorLockMode.Locked)
-            return;
+        //if (Cursor.lockState != CursorLockMode.Locked)
+        //    return;
 
         NetworkButtons buttons = default;
 
@@ -84,6 +86,8 @@ public class Fusion_NetInputManager : SimulationBehaviour, IBeforeUpdate, INetwo
 
             accumulatedInput.Direction += moveDirection;
             buttons.Set(InputButton.Jump, Gamepad.current.aButton.isPressed);
+
+            buttons.Set(InputButton.Options, Gamepad.current.startButton.isPressed);//----------------
         }
 
         accumulatedInput.Buttons = new NetworkButtons(accumulatedInput.Buttons.Bits | buttons.Bits);
@@ -149,8 +153,8 @@ public class Fusion_NetInputManager : SimulationBehaviour, IBeforeUpdate, INetwo
     {
         if (player == runner.LocalPlayer)
         {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
+            //Cursor.lockState = CursorLockMode.Locked;
+            //Cursor.visible = false;
         }
     }
 
@@ -186,8 +190,8 @@ public class Fusion_NetInputManager : SimulationBehaviour, IBeforeUpdate, INetwo
 
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
     {
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
+        //Cursor.lockState = CursorLockMode.None;
+        //Cursor.visible = true;
     }
 
     public void OnUserSimulationMessage(NetworkRunner runner, SimulationMessagePtr message)
