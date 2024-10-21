@@ -103,6 +103,8 @@ MonoBehaviour:
   camTarget: {fileID: 3793699803709986587}
   speed: 5
   jumpImpulse: 10
+  invertVertical: 1
+  deadzone: 0.7
   _Name: 
 --- !u!114 &1527304504097901265
 MonoBehaviour:
