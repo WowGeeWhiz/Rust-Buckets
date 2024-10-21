@@ -26,6 +26,7 @@ public class Fusion_Player : NetworkBehaviour
         {
 
             LoadPlayerName();//-----
+            RPC_PlayerName(Name); // Call the RPC to set the name for all clients----
             //Name = "MICHAEL";
             //name = playerprefs.getstring("username");
 
@@ -151,6 +152,8 @@ public class Fusion_Player : NetworkBehaviour
                 {
                     Name = inputField.text; // Update Name with the input field's text
                     NameTag.text = Name;
+
+                    RPC_PlayerName(Name);
                 }
                 SavePlayerName(); // Now save the updated player name to the file
             }
@@ -177,6 +180,10 @@ public class Fusion_Player : NetworkBehaviour
     [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
     private void RPC_PlayerName(string name) 
     {
-        Name = name;
+        Name = name; // Update the player's name
+        if (NameTag != null)
+        {
+            NameTag.text = Name; // Update the name tag for the player
+        }
     }
 }
