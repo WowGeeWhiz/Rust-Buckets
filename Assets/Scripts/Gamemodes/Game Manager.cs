@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
+using Fusion;
 
-public class GameManager : MonoBehaviour
+public class GameManager : NetworkBehaviour
 {
     public int redTeamScore;
     public int blueTeamScore;
@@ -13,9 +14,30 @@ public class GameManager : MonoBehaviour
 
     public string mode;
 
+    public List<GameObject> players;
+    public List<GameObject> redTeam;
+    public List<GameObject> blueTeam;
+
     // Start is called before the first frame update
     void Start()
     {
+        players.Add(GameObject.Find("Player(Clone)"));
+
+        bool isRedTeam = true;
+        foreach(var player in players)
+        {
+            if(isRedTeam)
+            {
+                redTeam.Add(player);
+                isRedTeam = !isRedTeam;
+            }
+            else
+            {
+                blueTeam.Add(player);
+                isRedTeam = !isRedTeam;
+            }
+        }
+
         mode = "CTF";
         //DontDestroyOnLoad(this.gameObject);
         redTeamScore = 0;
@@ -30,7 +52,7 @@ public class GameManager : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    public override void FixedUpdateNetwork()
     {
         if(blueTeamScore >= targetScore)
         {

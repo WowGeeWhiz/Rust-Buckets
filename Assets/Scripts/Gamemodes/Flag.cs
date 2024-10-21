@@ -52,12 +52,13 @@ public class Flag : MonoBehaviour
         {
             if (this.transform.IsChildOf(flagHolder))
             {
-                if (flagHolder.GetComponent<Player_Stats>().playerHP <= 0)
+                //doesn't exist with new player
+                /*if (flagHolder.GetComponent<Player_Stats>().playerHP <= 0)
                 {
                     flagHolder = null;
                     this.transform.parent = null;
                     this.gameObject.GetComponent<Rigidbody>().useGravity = true;
-                }
+                }*/
             }
         }
     }

@@ -101,7 +101,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   kcc: {fileID: 1527304504097901265}
   camTarget: {fileID: 3793699803709986587}
-  speed: 5
+  speed: 20
   jumpImpulse: 10
   invertVertical: 1
   deadzone: 0.7
