@@ -3,7 +3,7 @@ using TMPro;
 using System.IO;
 using Fusion;
 
-public class Fusion_InputFieldAllCaps : NetworkBehaviour
+public class Fusion_InputFieldAllCaps : MonoBehaviour 
 {
     private TMP_InputField tmpInputField; // For TMP Input Field
     public string playerName;

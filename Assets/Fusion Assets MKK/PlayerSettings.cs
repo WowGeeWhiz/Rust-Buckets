@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class PlayerSettings : MonoBehaviour
 {
-    int speed = 5;
+    public int speed = 5;
+    public GameObject player;
     // Start is called before the first frame update
     void Start()
     {
@@ -14,6 +15,12 @@ public class PlayerSettings : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        player = GameObject.Find("Player(Clone)");
+        player.transform.GetComponent<Fusion_Player>().speed = speed;
+    }
+
+    public void SpeedChange(int num)
+    {
+        speed = num;
     }
 }

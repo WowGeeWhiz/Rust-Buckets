@@ -7,7 +7,7 @@ public class Fusion_Player : NetworkBehaviour
 {
     [SerializeField] private SimpleKCC kcc;
     [SerializeField] private Transform camTarget;
-    [SerializeField] private float speed = 500f;
+    [SerializeField] public float speed = 500f;
     [SerializeField] private float jumpImpulse = 500f;
     [SerializeField] private bool invertVertical = true;
     [SerializeField] private float deadzone = 0.7f;
