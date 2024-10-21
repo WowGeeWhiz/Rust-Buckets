@@ -24,7 +24,6 @@ public class Fusion_Player : NetworkBehaviour
 
         if (HasInputAuthority) 
         {
-
             LoadPlayerName();//-----
             RPC_PlayerName(Name); // Call the RPC to set the name for all clients----
             //Name = "MICHAEL";
