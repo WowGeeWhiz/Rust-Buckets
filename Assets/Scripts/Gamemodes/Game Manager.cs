@@ -15,12 +15,13 @@ public class GameManager : NetworkBehaviour
     public string mode;
 
     public List<GameObject> players;
-    public List<GameObject> redTeam;
-    public List<GameObject> blueTeam;
+    public int redTeam;
+    public int blueTeam;
 
     // Start is called before the first frame update
     void Start()
     {
+        /*
         players.Add(GameObject.Find("Player(Clone)"));
 
         bool isRedTeam = true;
@@ -37,7 +38,7 @@ public class GameManager : NetworkBehaviour
                 isRedTeam = !isRedTeam;
             }
         }
-
+        */
         mode = "CTF";
         //DontDestroyOnLoad(this.gameObject);
         redTeamScore = 0;

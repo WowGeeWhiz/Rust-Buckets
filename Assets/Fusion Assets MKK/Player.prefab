@@ -105,6 +105,11 @@ MonoBehaviour:
   jumpImpulse: 10
   invertVertical: 1
   deadzone: 0.7
+  gameManager: {fileID: 0}
+  team: 
+  redTeam: {fileID: 2100000, guid: 1b61039e0fe00c14297fb60ffdcd7d01, type: 2}
+  blueTeam: {fileID: 2100000, guid: 0adfe8602a2800c4c8df522dcad0b281, type: 2}
+  defaultMaterial: {fileID: 6829190907696823249, guid: 52b9e25895e9a8048a425fa2cb34a1ff, type: 3}
   _Name: 
 --- !u!114 &1527304504097901265
 MonoBehaviour:
