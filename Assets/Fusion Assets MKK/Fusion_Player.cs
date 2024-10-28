@@ -2,6 +2,7 @@ using Fusion;
 using Fusion.Addons.SimpleKCC;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Fusion_Player : NetworkBehaviour
@@ -16,6 +17,8 @@ public class Fusion_Player : NetworkBehaviour
     public GameObject gameManager;
     public string team;
     public Material defaultMaterial;
+    public List<SkinnedMeshRenderer> skinnedMeshRenderer;
+    List<Material> materials = null;
 
     //private Fusion_Player_StateMachine playerStateMachine;//------------------
 
@@ -36,18 +39,41 @@ public class Fusion_Player : NetworkBehaviour
 
             //playerStateMachine = GetComponent<Fusion_Player_StateMachine>();//------------------
         }
+
         
         if(gameManager.GetComponent<GameManager>().redTeam <= gameManager.GetComponent<GameManager>().blueTeam)
         {
             team = "red";
             gameManager.GetComponent<GameManager>().redTeam++;
-            defaultMaterial.color = Color.red;
+            foreach (var allMaterials in skinnedMeshRenderer)
+            {
+                materials = allMaterials.materials.ToList();
+                foreach (var material in materials)
+                {
+                    if (material.name == "Dessert_Paint (Instance)")
+                    {
+                        material.color = Color.red;
+                    }
+                }
+            }
+            materials.Clear();
         }
         else
         {
             team = "blue";
             gameManager.GetComponent<GameManager>().blueTeam++;
-            defaultMaterial.color = Color.blue;
+            foreach (var allMaterials in skinnedMeshRenderer)
+            {
+                materials = allMaterials.materials.ToList();
+                foreach (var material in materials)
+                {
+                    if (material.name == "Dessert_Paint (Instance)")
+                    {
+                        material.color = Color.blue;
+                    }
+                }
+            }
+            materials.Clear();
         }
     }
 
