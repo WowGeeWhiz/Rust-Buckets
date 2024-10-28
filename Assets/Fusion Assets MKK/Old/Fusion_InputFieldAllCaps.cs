@@ -8,8 +8,6 @@ public class Fusion_InputFieldAllCaps : NetworkBehaviour
     private TMP_InputField tmpInputField; // For TMP Input Field
     public string playerName;
 
-    private const string filePath = "playerName.txt"; // Define the file path
-
     private void Awake()
     {
         // Try to find TMP_InputField in this GameObject or its children
@@ -21,7 +19,6 @@ public class Fusion_InputFieldAllCaps : NetworkBehaviour
         if (tmpInputField != null)
         {
             tmpInputField.onValueChanged.AddListener(OnValueChanged);
-            LoadPlayerName(); // Load the player name from the file
         }
     }
 
@@ -36,28 +33,6 @@ public class Fusion_InputFieldAllCaps : NetworkBehaviour
         }
 
         playerName = tmpInputField.text; // Update playerName with the current input
-        SavePlayerName(playerName); // Save the name to the file
-    }
-
-    private void SavePlayerName(string name)
-    {
-        File.WriteAllText(filePath, name); // Write the name to the text file
-    }
-
-    private void LoadPlayerName()
-    {
-        if (File.Exists(filePath))
-        {
-            playerName = File.ReadAllText(filePath); // Read the name from the text file
-            tmpInputField.text = playerName; // Set the TMP_InputField text
-        }
-        else
-        {
-            // Create the file with the default player name if it doesn't exist
-            playerName = ""; // Set default name
-            File.WriteAllText(filePath, playerName); // Create the file with the default name
-            tmpInputField.text = playerName; // Set the TMP_InputField text
-        }
     }
 
     private void OnDestroy()
