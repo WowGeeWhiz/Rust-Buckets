@@ -80,16 +80,4 @@ public class GameManager : NetworkBehaviour
         blueTeamScore += value;
     }
 
-    [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
-    public void RPC_Configure(string team)
-    {
-        if(team == "red")
-        {
-            redTeam++;
-        }
-        else if(team == "blue")
-        {
-            blueTeam++;
-        }
-    }
 }
