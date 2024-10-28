@@ -38,43 +38,45 @@ public class Fusion_Player : NetworkBehaviour
             Fusion_Camera_Follow.Singleton.SetTarget(camTarget);
 
             //playerStateMachine = GetComponent<Fusion_Player_StateMachine>();//------------------
+
+            if (gameManager.GetComponent<GameManager>().redTeam <= gameManager.GetComponent<GameManager>().blueTeam)
+            {
+                team = "red";
+                gameManager.GetComponent<GameManager>().redTeam++;
+                foreach (var allMaterials in skinnedMeshRenderer)
+                {
+                    materials = allMaterials.materials.ToList();
+                    foreach (var material in materials)
+                    {
+                        if (material.name == "Dessert_Paint (Instance)")
+                        {
+                            material.color = Color.red;
+                        }
+                    }
+                }
+                materials.Clear();
+            }
+            else
+            {
+                team = "blue";
+                gameManager.GetComponent<GameManager>().blueTeam++;
+                foreach (var allMaterials in skinnedMeshRenderer)
+                {
+                    materials = allMaterials.materials.ToList();
+                    foreach (var material in materials)
+                    {
+                        if (material.name == "Dessert_Paint (Instance)")
+                        {
+                            material.color = Color.blue;
+                        }
+                    }
+                }
+                materials.Clear();
+            }
         }
 
         
-        if(gameManager.GetComponent<GameManager>().redTeam <= gameManager.GetComponent<GameManager>().blueTeam)
-        {
-            team = "red";
-            gameManager.GetComponent<GameManager>().redTeam++;
-            foreach (var allMaterials in skinnedMeshRenderer)
-            {
-                materials = allMaterials.materials.ToList();
-                foreach (var material in materials)
-                {
-                    if (material.name == "Dessert_Paint (Instance)")
-                    {
-                        material.color = Color.red;
-                    }
-                }
-            }
-            materials.Clear();
-        }
-        else
-        {
-            team = "blue";
-            gameManager.GetComponent<GameManager>().blueTeam++;
-            foreach (var allMaterials in skinnedMeshRenderer)
-            {
-                materials = allMaterials.materials.ToList();
-                foreach (var material in materials)
-                {
-                    if (material.name == "Dessert_Paint (Instance)")
-                    {
-                        material.color = Color.blue;
-                    }
-                }
-            }
-            materials.Clear();
-        }
+        
     }
 
     public override void FixedUpdateNetwork() 
