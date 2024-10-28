@@ -45,7 +45,7 @@ public class Fusion_Player : NetworkBehaviour
         if (gameManager.GetComponent<GameManager>().redTeam <= gameManager.GetComponent<GameManager>().blueTeam)
         {
             team = "red";
-            gameManager.GetComponent<GameManager>().redTeam++;
+            gameManager.GetComponent<GameManager>().RPC_Configure(team);
             foreach (var allMaterials in skinnedMeshRenderer)
             {
                 materials = allMaterials.materials.ToList();
@@ -62,7 +62,7 @@ public class Fusion_Player : NetworkBehaviour
         else
         {
             team = "blue";
-            gameManager.GetComponent<GameManager>().blueTeam++;
+            gameManager.GetComponent<GameManager>().RPC_Configure(team);
             foreach (var allMaterials in skinnedMeshRenderer)
             {
                 materials = allMaterials.materials.ToList();
