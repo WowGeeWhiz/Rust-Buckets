@@ -15,8 +15,8 @@ public class GameManager : NetworkBehaviour
     public string mode;
 
     public List<GameObject> players;
-    public int redTeam;
-    public int blueTeam;
+    [Networked] public int redTeam { get; set; }
+    [Networked] public int blueTeam { get; set; }
 
     // Start is called before the first frame update
     void Start()
