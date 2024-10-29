@@ -17,13 +17,16 @@ public class Flag : MonoBehaviour
 
     public GameObject CTFParent;
 
+    public Transform flagHolder;
+
     Vector3 initialFlagPosition;
 
-    public float flagReturnTime = 10.0f;
+    public float flagReturnTime;
 
     // Start is called before the first frame update
     void Start()
     {
+        flagReturnTime = 10.0f;
         initialFlagPosition = this.transform.position;
     }
 
@@ -32,10 +35,10 @@ public class Flag : MonoBehaviour
     {
         //returns flag after it's on the ground for 10 seconds
         //currently untested. probably works
-        //checks if flag is attached to aan object
-        if(!this.transform.IsChildOf(transform))
+        //checks if flag is attached to an object
+        if(this.gameObject.transform.position != initialFlagPosition && flagHolder == null)
         {
-            flagReturnTime -= Time.fixedDeltaTime;
+            flagReturnTime -= Time.deltaTime;
         }
         if(flagReturnTime <= 0 )
         {
@@ -44,16 +47,20 @@ public class Flag : MonoBehaviour
             this.transform.position = initialFlagPosition;
         }
 
-
-        /*
-         * makes the flag fall to the ground if a player dies while holding it
-         * psuedocode right now because I'm not really sure how a player death is handled or can be called like this
-         * the games also not really in a state where that's easily tested
-         * if(player.dies){
-         *      this.transform.parent = null;
-         *      this.gameObject.GetComponent<Rigidbody>().useGravity = true;
-         * }
-         */
+        //makes the flag fall to the ground if a player dies while holding it
+        if (flagHolder != null)
+        {
+            if (this.transform.IsChildOf(flagHolder))
+            {
+                //doesn't exist with new player
+                /*if (flagHolder.GetComponent<Player_Stats>().playerHP <= 0)
+                {
+                    flagHolder = null;
+                    this.transform.parent = null;
+                    this.gameObject.GetComponent<Rigidbody>().useGravity = true;
+                }*/
+            }
+        }
     }
 
     public void OnCollisionEnter(Collision collision)
@@ -63,6 +70,7 @@ public class Flag : MonoBehaviour
         if (collision.gameObject.tag == "Player")
         {
             this.gameObject.transform.SetParent(collision.gameObject.transform, false);
+            flagHolder = collision.gameObject.transform;
             this.gameObject.transform.position = collision.gameObject.transform.position + new Vector3(0, 2, 1);
         }
     }

@@ -1,5 +1,8 @@
 using Fusion;
 using Fusion.Addons.SimpleKCC;
+using System.Collections.Generic;
+using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Fusion_Player : NetworkBehaviour
@@ -11,6 +14,12 @@ public class Fusion_Player : NetworkBehaviour
     [SerializeField] private bool invertVertical = true;
     [SerializeField] private float deadzone = 0.7f;
 
+    public GameObject gameManager;
+    public string team;
+    public Material defaultMaterial;
+    public List<SkinnedMeshRenderer> skinnedMeshRenderer;
+    List<Material> materials = null;
+
     //private Fusion_Player_StateMachine playerStateMachine;//------------------
 
     [Networked] public string Name { get; private set; }
@@ -18,6 +27,7 @@ public class Fusion_Player : NetworkBehaviour
 
     public override void Spawned()
     {
+        gameManager = GameObject.Find("GameManager");
         kcc.SetGravity(Physics.gravity.y * 2f);
 
         if (HasInputAuthority) 
@@ -28,6 +38,42 @@ public class Fusion_Player : NetworkBehaviour
             Fusion_Camera_Follow.Singleton.SetTarget(camTarget);
 
             //playerStateMachine = GetComponent<Fusion_Player_StateMachine>();//------------------
+        }
+
+        
+        if(gameManager.GetComponent<GameManager>().redTeam <= gameManager.GetComponent<GameManager>().blueTeam)
+        {
+            team = "red";
+            gameManager.GetComponent<GameManager>().redTeam++;
+            foreach (var allMaterials in skinnedMeshRenderer)
+            {
+                materials = allMaterials.materials.ToList();
+                foreach (var material in materials)
+                {
+                    if (material.name == "Dessert_Paint (Instance)")
+                    {
+                        material.color = Color.red;
+                    }
+                }
+            }
+            materials.Clear();
+        }
+        else
+        {
+            team = "blue";
+            gameManager.GetComponent<GameManager>().blueTeam++;
+            foreach (var allMaterials in skinnedMeshRenderer)
+            {
+                materials = allMaterials.materials.ToList();
+                foreach (var material in materials)
+                {
+                    if (material.name == "Dessert_Paint (Instance)")
+                    {
+                        material.color = Color.blue;
+                    }
+                }
+            }
+            materials.Clear();
         }
     }
 
