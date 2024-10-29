@@ -44,6 +44,8 @@ GameObject:
   - component: {fileID: 2475855045287888715}
   - component: {fileID: 1527304504097901265}
   - component: {fileID: 6936345430215644419}
+  - component: {fileID: 138864213777272882}
+  - component: {fileID: 5186018231858424685}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -169,6 +171,34 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &138864213777272882
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8567524557262145926}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0af70fc09c0712345823b6c599b6e833, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inventoryLevelName: mainMenu
+  debugInventoryContainer: 1
+  combatInventory: {fileID: 0}
+--- !u!114 &5186018231858424685
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8567524557262145926}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2a921d1d785f564e9d838a64243d256, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currentWeapon: {fileID: 0}
 --- !u!1001 &3679825181314093891
 PrefabInstance:
   m_ObjectHideFlags: 0

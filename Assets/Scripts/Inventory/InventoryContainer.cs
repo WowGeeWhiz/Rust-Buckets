@@ -1,11 +1,36 @@
+using Fusion;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using static Unity.Collections.Unicode;
+using UnityEngine.SceneManagement;
+using Fusion.Addons.SimpleKCC;
+using Unity.Netcode;
+using UnityEngine.UI;
+using TMPro;
+using System.Net;
+using System.Net.Sockets;
+using Unity.Netcode.Transports.UTP;
 public class InventoryContainer : MonoBehaviour
 {
-    private InventoryNode firstItem;
+    public InventoryNode firstItem;
+    public string inventoryLevelName = "mainMenu";
+    public bool debugInventoryContainer = false;
+
+    public void Start()
+    {
+        if (debugInventoryContainer) Debug.Log("Start called");
+        if (SceneManager.GetActiveScene().name != "mainMenu")
+        {
+            if (debugInventoryContainer)
+            {
+                Item temp = (Item) ScriptableObject.CreateInstance("Item");
+                firstItem = new InventoryNode(ref temp, 0);
+            }
+            GenerateCombatInventory();
+        }
+    }
 
     public ref InventoryNode FirstItem()
     {
@@ -16,6 +41,7 @@ public class InventoryContainer : MonoBehaviour
         firstItem = input;
     }
 
+    
     public ref InventoryNode GetNodeAtPos(int pos)
     {
         ref InventoryNode output = ref firstItem;
@@ -36,9 +62,12 @@ public class InventoryContainer : MonoBehaviour
     }
 
 
+    //combat inventory is the inventory used in a match that just has the equipped weapons
     public CombatInventory combatInventory;
+    //needs to trigger when loading into a level
     public void GenerateCombatInventory()
     {
+        if (debugInventoryContainer) Debug.Log("Generating combat inventory");
         combatInventory.GenerateCombatInventory(firstItem.GetItemsRecursiveStart());
     }
 

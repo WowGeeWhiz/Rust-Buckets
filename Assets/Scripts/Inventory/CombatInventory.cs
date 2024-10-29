@@ -7,6 +7,7 @@ public class CombatInventory : MonoBehaviour
 {
     public CombatNode currentWeapon;
 
+    //populate this inventory from the equipped items in the main inventory
     public void GenerateCombatInventory(List<Item> items)
     {
         Item item1 = null, item2 = null, item3 = null;
@@ -39,6 +40,7 @@ public class CombatInventory : MonoBehaviour
         currentWeapon.next.next = currentWeapon.prev;
     }
 
+    //for use in a scene when running over an item on the ground
     public void Pickup(Item item)
     {
         if (currentWeapon.item == null)

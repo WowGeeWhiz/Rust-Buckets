@@ -278,6 +278,8 @@ GameObject:
   - component: {fileID: 4746086952163371742}
   - component: {fileID: 2560666982860935301}
   - component: {fileID: 2411148249545469578}
+  - component: {fileID: 5593555200460624410}
+  - component: {fileID: 4510173980075471351}
   m_Layer: 0
   m_Name: Player_Container
   m_TagString: Player
@@ -302,7 +304,7 @@ Transform:
   - {fileID: 1133639276525407966}
   - {fileID: 6265389800091493426}
   m_Father: {fileID: 0}
-  m_RootOrder: -1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &2700293333520861021
 MeshFilter:
@@ -502,6 +504,34 @@ MonoBehaviour:
   SpawnWithObservers: 1
   DontDestroyWithOwner: 0
   AutoObjectParentSync: 1
+--- !u!114 &5593555200460624410
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9059521582870002257}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2a921d1d785f564e9d838a64243d256, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currentWeapon: {fileID: 0}
+--- !u!114 &4510173980075471351
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9059521582870002257}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0af70fc09c0712345823b6c599b6e833, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inventoryLevelName: mainMenu
+  debugInventoryContainer: 1
+  combatInventory: {fileID: 5593555200460624410}
 --- !u!1001 &590472477818693941
 PrefabInstance:
   m_ObjectHideFlags: 0
