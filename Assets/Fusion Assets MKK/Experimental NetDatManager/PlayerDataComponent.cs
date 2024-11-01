@@ -7,14 +7,12 @@ using TMPro;
 public class PlayerDataComponent : NetworkBehaviour
 {
     [SerializeField] private PlayerData playerData;
-
-
-    [SerializeField] private TextMeshPro NameTag;//-----------
+    [SerializeField] private TextMeshPro NameTag; // Reference to the name tag UI
 
     public PlayerData PlayerData
     {
         get => playerData;
-        set 
+        set
         {
             playerData = value;
             UpdatePlayerName();
@@ -23,7 +21,6 @@ public class PlayerDataComponent : NetworkBehaviour
 
     public void UpdatePlayerName()
     {
-        // Check if Knighten_NetDataManager has the current player's name
         if (Knighten_NetDataManager.Instance != null)
         {
             // Retrieve the player's current name from the manager
@@ -31,10 +28,9 @@ public class PlayerDataComponent : NetworkBehaviour
 
             if (updatedData != null)
             {
-                // Set the name to the one retrieved from the manager
                 playerData.Name = updatedData.Name;
 
-                // Notify the player to update the name tag if this component has input authority
+                // Update the name tag if this component has input authority
                 if (Object.HasInputAuthority)
                 {
                     NameTag.text = playerData.Name;
@@ -43,7 +39,6 @@ public class PlayerDataComponent : NetworkBehaviour
         }
     }
 
-
     public override void Spawned()
     {
         if (Object.HasInputAuthority)
@@ -51,24 +46,23 @@ public class PlayerDataComponent : NetworkBehaviour
             InitializePlayerData();
         }
 
-        if (Knighten_NetDataManager.Instance != null)
-        {
-            Knighten_NetDataManager.Instance.RegisterPlayer(this);
-        }
+        // Always register player data with the manager
+        Knighten_NetDataManager.Instance?.RegisterPlayer(this);
     }
 
     public override void Despawned(NetworkRunner runner, bool hasState)
     {
         // Unregister from Knighten_NetDataManager to ensure clean-up
-        if (Knighten_NetDataManager.Instance != null)
-        {
-            Knighten_NetDataManager.Instance.UnregisterPlayer(this);
-        }
+        Knighten_NetDataManager.Instance?.UnregisterPlayer(this);
     }
 
-    public override void FixedUpdateNetwork() 
+    public override void FixedUpdateNetwork()
     {
-        NameTag.text = playerData.Name;
+        // Update the name tag text only if this instance has input authority
+        if (Object.HasInputAuthority)
+        {
+            NameTag.text = playerData.Name;
+        }
     }
 
     private void InitializePlayerData()
@@ -80,8 +74,7 @@ public class PlayerDataComponent : NetworkBehaviour
             State = "Idle" // Set the initial state
         };
 
-        Debug.Log($"Initialized player name: {playerData.Name}"); // Add this line to debug
+        Debug.Log($"Initialized player name: {playerData.Name}"); // Debug log
         UpdatePlayerName(); // Update the UI with the initial name
     }
-
 }
