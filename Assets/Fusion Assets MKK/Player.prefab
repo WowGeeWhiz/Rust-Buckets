@@ -532,6 +532,50 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Padding: {x: -8, y: -5, z: -8, w: -5}
   m_Softness: {x: 0, y: 0}
+--- !u!1 &6625731147482884350
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 877487026882445870}
+  - component: {fileID: 396114800949093017}
+  m_Layer: 3
+  m_Name: Knighten_Net_Manager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &877487026882445870
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6625731147482884350}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7625546079314341861}
+  m_RootOrder: -1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &396114800949093017
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6625731147482884350}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 50863c2bd18dc2f44a4f03e99d88ea64, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &7043709570684550623
 GameObject:
   m_ObjectHideFlags: 0
@@ -1221,8 +1265,8 @@ GameObject:
   - component: {fileID: 2475855045287888715}
   - component: {fileID: 1527304504097901265}
   - component: {fileID: 6936345430215644419}
-  - component: {fileID: 4039180949506078285}
   - component: {fileID: 2578234626683796615}
+  - component: {fileID: 5809838088407166238}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -1246,6 +1290,7 @@ Transform:
   - {fileID: 3793699803709986587}
   - {fileID: 2877883004251025554}
   - {fileID: 5592763186370745716}
+  - {fileID: 877487026882445870}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1269,6 +1314,8 @@ MonoBehaviour:
   NetworkedBehaviours:
   - {fileID: 2475855045287888715}
   - {fileID: 1527304504097901265}
+  - {fileID: 5809838088407166238}
+  - {fileID: 396114800949093017}
 --- !u!114 &2475855045287888715
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1287,9 +1334,9 @@ MonoBehaviour:
   jumpImpulse: 10
   invertVertical: 1
   deadzone: 0.7
-  NameTag: {fileID: 0}
-  SettingsMenu: {fileID: 0}
-  InputField: {fileID: 0}
+  SettingsMenu: {fileID: 8736408171491267665}
+  InputField: {fileID: 3792127481130435630}
+  eventSystem: {fileID: 0}
   _Name: '"Player Name"'
 --- !u!114 &1527304504097901265
 MonoBehaviour:
@@ -1354,22 +1401,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &4039180949506078285
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8567524557262145926}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9023a1b2e4218f24f8b5a10a277c53b1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  currentState: 0
-  idleAnimation: {fileID: 7400000, guid: cd3c95f7eb30457438fc6666c58bde78, type: 2}
-  runAnimation: {fileID: 7400000, guid: c4024b9dc3d8b9840a75981b871c89e1, type: 2}
-  Rustbucket: {fileID: 0}
 --- !u!111 &2578234626683796615
 Animation:
   m_ObjectHideFlags: 0
@@ -1386,6 +1417,23 @@ Animation:
   m_AnimatePhysics: 0
   m_UpdateMode: 0
   m_CullingType: 0
+--- !u!114 &5809838088407166238
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8567524557262145926}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c53d56a005a5783449fd7c6a68e0272a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerData:
+    Name: 
+    HP: 0
+    State: 
+  NameTag: {fileID: 2302285305332363141}
 --- !u!1001 &3679825181314093891
 PrefabInstance:
   m_ObjectHideFlags: 0

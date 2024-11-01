@@ -90,7 +90,7 @@ public class Fusion_NetInputManager : SimulationBehaviour, IBeforeUpdate, INetwo
             buttons.Set(InputButton.Options, Gamepad.current.startButton.isPressed);//----------------
         }
 
-        accumulatedInput.Buttons = new NetworkButtons(accumulatedInput.Buttons.Bits | buttons.Bits);
+            accumulatedInput.Buttons = new NetworkButtons(accumulatedInput.Buttons.Bits | buttons.Bits);
 
     }
 
