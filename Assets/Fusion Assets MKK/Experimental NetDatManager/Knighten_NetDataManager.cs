@@ -1,12 +1,6 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Fusion;
-
-
-/// <summary>
-/// Add this to a child object of the player or they might be deleted if detection of duplication of the singleton is detected.
-/// </summary>
 
 public class Knighten_NetDataManager : NetworkBehaviour
 {
@@ -24,6 +18,7 @@ public class Knighten_NetDataManager : NetworkBehaviour
             return instance;
         }
     }
+
     private void Awake()
     {
         if (instance != null && instance != this)
@@ -35,7 +30,6 @@ public class Knighten_NetDataManager : NetworkBehaviour
         instance = this;
         DontDestroyOnLoad(gameObject);  // Keep this instance persistent
     }
-
 
     public override void Spawned()
     {
@@ -58,7 +52,6 @@ public class Knighten_NetDataManager : NetworkBehaviour
             }
         }
     }
-
 
     public void RegisterPlayer(PlayerDataComponent playerDataComponent)
     {
