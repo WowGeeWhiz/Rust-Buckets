@@ -33,6 +33,7 @@ public class Knighten_NetDataManager : NetworkBehaviour
 
     public override void Spawned()
     {
+        // Only initialize player data if this instance is controlled by the server
         if (Object.HasStateAuthority && instance == this)
         {
             InitializePlayerData();
@@ -53,25 +54,54 @@ public class Knighten_NetDataManager : NetworkBehaviour
         }
     }
 
+    // Only allow the server to register players
     public void RegisterPlayer(PlayerDataComponent playerDataComponent)
     {
+        if (!Object.HasStateAuthority)
+        {
+            Debug.LogWarning("Attempt to register player from non-authoritative client.");
+            return;
+        }
+
         int playerId = playerDataComponent.GetComponent<NetworkObject>().Id.GetHashCode();
         if (!players.ContainsKey(playerId))
         {
             players[playerId] = playerDataComponent;
             Debug.Log($"Player registered: {playerDataComponent.PlayerData.Name}");
         }
+
+        LogCurrentPlayers();
     }
 
+    private void LogCurrentPlayers()
+    {
+        Debug.LogWarning("IMPORTANT: Current Players:");
+        foreach (var player in players)
+        {
+            Debug.Log($"- {player.Value.PlayerData.Name} (ID: {player.Key})");
+        }
+    }
+
+    // Only allow the server to unregister players
     public void UnregisterPlayer(PlayerDataComponent playerDataComponent)
     {
+        if (!Object.HasStateAuthority)
+        {
+            Debug.LogWarning("Attempt to unregister player from non-authoritative client.");
+            return;
+        }
+
         int playerId = playerDataComponent.GetComponent<NetworkObject>().Id.GetHashCode();
         if (players.ContainsKey(playerId))
         {
             players.Remove(playerId);
             Debug.Log($"Player unregistered: {playerDataComponent.PlayerData.Name}");
+
+            // Optionally log current players after unregistration as well
+            LogCurrentPlayers();
         }
     }
+
 
     public PlayerData GetPlayerData(int playerId)
     {
