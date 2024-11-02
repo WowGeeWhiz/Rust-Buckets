@@ -82,15 +82,7 @@ public class Fusion_Player : NetworkBehaviour
         //previousButtons = input.Buttons;
     }
 
-    //private void HandleMenuToggle(Fusion_NetInput input)
-    //{
-    //    if (input.Buttons.WasPressed(previousButtons, InputButton.Options))
-    //    {
-    //        ToggleMenu();
-    //    }
 
-    //    //previousButtons = input.Buttons;
-    //}
 
     private void HandleMenuToggle(Fusion_NetInput input)
     {
@@ -119,27 +111,11 @@ public class Fusion_Player : NetworkBehaviour
         {
             playerDataComponent.PlayerData.Name = InputField.text; // Set name in PlayerData
         }
+
+        Knighten_NetDataManager.Instance.RPC_UpdateNameTag(playerDataComponent.GetComponent<NetworkObject>().Id.GetHashCode(), InputField.text);
     }
 
-    //private void ToggleMenu()
-    //{
-    //    bool isActive = SettingsMenu.gameObject.activeSelf;
-    //    SettingsMenu.gameObject.SetActive(!isActive);
 
-    //    Debug.LogWarning(isActive ? "Closing Menu" : "Opening Menu");
-
-    //    if (HasInputAuthority && !isActive)
-    //    {
-    //        EventSystem.current.SetSelectedGameObject(InputField.gameObject);
-    //        InputField.ActivateInputField();
-    //        Debug.Log("InputField activated.");
-    //    }
-    //    else
-    //    {
-    //        EventSystem.current.SetSelectedGameObject(null);
-    //        Debug.Log("InputField deactivated.");
-    //    }
-    //}
 
     private void ToggleMenu()
     {

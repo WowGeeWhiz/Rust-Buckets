@@ -10,19 +10,25 @@ public class Fusion_Spawner : NetworkBehaviour, IPlayerJoined, IPlayerLeft
 
     public GameObject[] spawnPoints;
 
-    public void PlayerJoined(PlayerRef player) 
+    public void PlayerJoined(PlayerRef player)
     {
-
-        if (HasStateAuthority) 
+        if (HasStateAuthority)
         {
-
             Vector3 spawnPosition = GetSpawnPosition();
+            Debug.LogError($"Player {player} joined, spawning at position: {spawnPosition}");
 
-            NetworkObject PlayerObject = Runner.Spawn(PlayerPrefab, spawnPosition, Quaternion.identity, player);
-            Players.Add(player, PlayerObject.GetComponent<Fusion_Player>());
+            NetworkObject playerObject = Runner.Spawn(PlayerPrefab, spawnPosition, Quaternion.identity, player);
+            if (playerObject == null)
+            {
+                Debug.LogError("Failed to spawn player object.");
+                return;
+            }
+
+            Players.Add(player, playerObject.GetComponent<Fusion_Player>());
+            Debug.Log($"Player {player} spawned successfully.");
         }
-
     }
+
 
     public void PlayerLeft(PlayerRef player)
     {

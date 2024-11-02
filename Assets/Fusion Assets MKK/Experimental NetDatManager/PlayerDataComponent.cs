@@ -7,7 +7,7 @@ using TMPro;
 public class PlayerDataComponent : NetworkBehaviour
 {
     [SerializeField] private PlayerData playerData;
-    [SerializeField] private TextMeshPro NameTag; // Reference to the name tag UI
+    [SerializeField] public TextMeshPro NameTag; // Reference to the name tag UI
 
     public PlayerData PlayerData
     {
@@ -16,6 +16,14 @@ public class PlayerDataComponent : NetworkBehaviour
         {
             playerData = value;
             UpdatePlayerName();
+        }
+    }
+
+    private void Awake()
+    {
+        if (PlayerData == null)
+        {
+            Debug.LogError("PlayerData is not initialized!");
         }
     }
 
@@ -41,12 +49,14 @@ public class PlayerDataComponent : NetworkBehaviour
 
     public override void Spawned()
     {
-        if (Object.HasInputAuthority)
+        if (Object == null)
         {
-            InitializePlayerData();
+            Debug.LogError("NetworkObject (Object) is null in Spawned method.");
+            return;
         }
 
-        // Always register player data with the manager
+        InitializePlayerData(); // Initialize player data
+
         Knighten_NetDataManager.Instance?.RegisterPlayer(this);
     }
 
@@ -69,7 +79,7 @@ public class PlayerDataComponent : NetworkBehaviour
     {
         playerData = new PlayerData
         {
-            Name = "Player_" + Object.Id, // Use the NetworkId or other identifiers
+            Name = "Player_" + Object.Id.GetHashCode(), // Use the NetworkId or other identifiers
             HP = 100, // Set the initial HP
             State = "Idle" // Set the initial state
         };
